@@ -37,11 +37,32 @@ public struct RemoteFeedLoader {
     public func load(completion: @escaping (Result) -> Void) {
         client.get(from: url) { result in
             switch result {
-            case .success:
-                completion(.failure(.invalidResponse))
+            case .success(let data, let response):
+                if response.statusCode == 200,
+                    let root = try? JSONDecoder().decode(Root.self, from: data) {
+                    completion(.success(root.feedItems))
+                } else {
+                    completion(.failure(.invalidResponse))
+                }
             case .failure:
                 completion(.failure(.connection))
             }
         }
+    }
+}
+
+private struct Root: Decodable {
+    let items: [Item]
+    var feedItems: [FeedItem] { items.map{ $0.item } }
+}
+
+private struct Item: Decodable {
+    let id: UUID
+    let description: String?
+    let location: String?
+    let image: URL
+    
+    var item: FeedItem {
+        return FeedItem(id: id, description: description, location: location, imageURL: image)
     }
 }
