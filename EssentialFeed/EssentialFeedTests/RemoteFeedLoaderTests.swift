@@ -22,7 +22,7 @@ final class RemoteFeedLoaderTests: XCTestCase {
         XCTAssertEqual(client.requestedUrls, [url])
     }
     
-    func test_loadTwice_shouldRequestDataFromUrlTwice() {
+    func test_load_twice_shouldRequestDataFromUrlTwice() {
         let url = URL(string: "https://remote-feed-test-url.com")!
         let (sut, client) = makeSut(url: url)
         sut.load {_ in }
@@ -33,13 +33,13 @@ final class RemoteFeedLoaderTests: XCTestCase {
     func test_load_withConnectionError_shouldDeliverConnectionError() {
         let (sut, client) = makeSut()
         
-        var capturedErrors = [RemoteFeedLoader.Error]()
+        var capturedErrors = [RemoteFeedLoader.Result]()
         sut.load { capturedErrors.append($0) }
         
         let error = NSError(domain: "Test", code: 0)
         client.requestCompletionHandlers.last?.completion(.failure(error))
         
-        XCTAssertEqual(capturedErrors, [.connection])
+        XCTAssertEqual(capturedErrors, [.failure(.connection)])
     }
     
     func test_load_withNon200HTTPCode_shouldDeliverInvalidResponseError() {
@@ -48,13 +48,14 @@ final class RemoteFeedLoaderTests: XCTestCase {
         let codes = [199, 300, 400, 500]
         
         codes.enumerated().forEach { index, code in
-            var capturedErrors = [RemoteFeedLoader.Error]()
+            var capturedErrors = [RemoteFeedLoader.Result]()
             sut.load { capturedErrors.append($0) }
             
             let response = response(url: client.requestedUrls[index], code: code)
-            client.requestCompletionHandlers.last?.completion(.success(response))
+            let data = Data()
+            client.requestCompletionHandlers.last?.completion(.success(data, response))
             
-            XCTAssertEqual(capturedErrors, [.invalidResponse])
+            XCTAssertEqual(capturedErrors, [.failure(.invalidResponse)])
         }
     }
     
