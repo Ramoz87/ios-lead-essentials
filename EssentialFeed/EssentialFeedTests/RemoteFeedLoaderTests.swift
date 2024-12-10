@@ -137,6 +137,7 @@ final class RemoteFeedLoaderTests: XCTestCase {
         return try! JSONSerialization.data(withJSONObject: json)
     }
     
+    
     private class HTTPClientSpy: HTTPClient {
         var requestCompletionHandlers = [(url: URL, completion: (HTTPClientResult) -> Void)]()
         
