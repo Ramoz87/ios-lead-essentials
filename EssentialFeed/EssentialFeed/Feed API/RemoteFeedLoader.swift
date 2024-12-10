@@ -29,7 +29,7 @@ public struct RemoteFeedLoader {
         self.url = url
     }
     
-    public func load(completion: @escaping (Error?) -> Void) {
+    public func load(completion: @escaping (Error) -> Void) {
         client.get(from: url) { result in
             switch result {
             case .success:

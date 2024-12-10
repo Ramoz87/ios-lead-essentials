@@ -30,6 +30,34 @@ final class RemoteFeedLoaderTests: XCTestCase {
         XCTAssertEqual(client.requestedUrls, [url, url])
     }
     
+    func test_load_withConnectionError_shouldDeliverConnectionError() {
+        let (sut, client) = makeSut()
+        
+        var capturedErrors = [RemoteFeedLoader.Error]()
+        sut.load { capturedErrors.append($0) }
+        
+        let error = NSError(domain: "Test", code: 0)
+        client.requestCompletionHandlers.last?.completion(.failure(error))
+        
+        XCTAssertEqual(capturedErrors, [.connection])
+    }
+    
+    func test_load_withNon200HTTPCode_shouldDeliverInvalidResponseError() {
+        let (sut, client) = makeSut()
+        
+        let codes = [199, 300, 400, 500]
+        
+        codes.enumerated().forEach { index, code in
+            var capturedErrors = [RemoteFeedLoader.Error]()
+            sut.load { capturedErrors.append($0) }
+            
+            let response = response(url: client.requestedUrls[index], code: code)
+            client.requestCompletionHandlers.last?.completion(.success(response))
+            
+            XCTAssertEqual(capturedErrors, [.invalidResponse])
+        }
+    }
+    
     //MARK: - Helpers
     
     private func makeSut(url: URL = URL(string: "https://remote-feed-url.com")!) -> (RemoteFeedLoader, HTTPClientSpy) {
@@ -38,11 +66,20 @@ final class RemoteFeedLoaderTests: XCTestCase {
         return (sut, client)
     }
     
+    private func response(url: URL, code: Int) -> HTTPURLResponse {
+        HTTPURLResponse(url: url, statusCode: code, httpVersion: nil, headerFields: nil)!
+    }
+    
+    
     private class HTTPClientSpy: HTTPClient {
-        var requestedUrls = [URL]()
+        var requestCompletionHandlers = [(url: URL, completion: (HTTPClientResult) -> Void)]()
+        
+        var requestedUrls: [URL] {
+            return requestCompletionHandlers.map(\.url)
+        }
         
         func get(from url: URL, completeion: @escaping (HTTPClientResult) -> Void) {
-            requestedUrls.append(url)
+            requestCompletionHandlers.append((url, completeion))
         }
     }
 }
