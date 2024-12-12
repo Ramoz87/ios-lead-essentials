@@ -33,7 +33,7 @@ internal final class RemoteFeedLoaderDataMapper {
         let successCodes = Range(uncheckedBounds: (200, 300))
         guard successCodes.contains(response.statusCode),
               let result = try? JSONDecoder().decode(RemoteFeedItems.self, from: data) else {
-            return .failure(.invalidResponse)
+            return .failure(RemoteFeedLoader.Error.invalidResponse)
         }
         
         return .success(result.feed)
