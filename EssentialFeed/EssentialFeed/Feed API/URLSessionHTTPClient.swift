@@ -1,5 +1,5 @@
 //
-//  URLSesssionHTTPClient.swift
+//  URLSessionHTTPClient.swift
 //  EssentialFeed
 //
 //  Created by Yury Ramazanov on 13.12.2024.
@@ -7,11 +7,11 @@
 
 import Foundation
 
-public class URLSesssionHTTPClient: HTTPClient {
+public class URLSessionHTTPClient: HTTPClient {
    
     private let session: URLSession
     
-    public init(session: URLSession) {
+    public init(session: URLSession = .shared) {
         self.session = session
     }
     
