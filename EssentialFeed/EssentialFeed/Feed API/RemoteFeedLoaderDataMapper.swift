@@ -29,7 +29,6 @@ internal final class RemoteFeedLoaderDataMapper {
     }
     
     internal static func map(_ data: Data, _ response: HTTPURLResponse) -> RemoteFeedLoader.Result {
-        
         let successCodes = Range(uncheckedBounds: (200, 300))
         guard successCodes.contains(response.statusCode),
               let result = try? JSONDecoder().decode(RemoteFeedItems.self, from: data) else {
