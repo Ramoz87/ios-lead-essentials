@@ -134,6 +134,24 @@ final class CacheFeedUseCaseTests: XCTestCase {
         XCTAssertEqual(store.commands, [.delete, .insert(items, timestamp)])
     }
     
+    func test_save_successOnDeleteAndInsert_successCompletion() {
+        let items = [uniqueItem(), uniqueItem()]
+        let (sut, store) = makeSUT()
+        let exp = expectation(description: "Wait for save completion")
+        
+        var receivedError: Error?
+        sut.save(items) { error in
+            receivedError = error
+            exp.fulfill()
+        }
+        
+        store.completeDelete(with: nil)
+        store.completeInsert(with: nil)
+        wait(for: [exp], timeout: 1.0)
+        
+        XCTAssertNil(receivedError)
+    }
+    
     
     //MARK: - Helpers
     
