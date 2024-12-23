@@ -42,8 +42,9 @@ class LocalFeedLoader {
         self.currentDate = date
     }
     
-    func save(_ items: [FeedItem]) {
+    func save(_ items: [FeedItem], completion: @escaping (Error?) -> Void) {
         store.deleteCachedFeed {[unowned self] error in
+            completion(error)
             if error == nil {
                 self.store.insert(items, timeStamp: self.currentDate())
             }
@@ -61,7 +62,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
     func test_save_performaCacheDelete() {
         let (sut, store) = makeSUT()
         let items = [uniqueItem(), uniqueItem()]
-        sut.save(items)
+        sut.save(items) { _ in }
         
         XCTAssertEqual(store.commands, [.delete])
     }
@@ -71,10 +72,28 @@ final class CacheFeedUseCaseTests: XCTestCase {
         let items = [uniqueItem(), uniqueItem()]
         let deleteError = anyNSError()
         
-        sut.save(items)
+        sut.save(items) { _ in }
         store.completeDelete(with: deleteError)
         
         XCTAssertEqual(store.commands, [.delete])
+    }
+    
+    func test_save_errorOnDelete_deliverError() {
+        let items = [uniqueItem(), uniqueItem()]
+        let (sut, store) = makeSUT()
+        let deletionError = anyNSError()
+        let exp = expectation(description: "Wait for save completion")
+        
+        var receivedError: Error?
+        sut.save(items) { error in
+            receivedError = error
+            exp.fulfill()
+        }
+        
+        store.completeDelete(with: deletionError)
+        wait(for: [exp], timeout: 1.0)
+        
+        XCTAssertEqual(receivedError as NSError?, deletionError)
     }
         
     func test_save_successOnDelete_insertCacheWithTimestamp() {
@@ -82,11 +101,12 @@ final class CacheFeedUseCaseTests: XCTestCase {
         let items = [uniqueItem(), uniqueItem()]
         let (sut, store) = makeSUT(currentDate: { timestamp })
         
-        sut.save(items)
+        sut.save(items) { _ in }
         store.completeDelete(with: nil)
         
         XCTAssertEqual(store.commands, [.delete, .insert(items, timestamp)])
     }
+    
     
     //MARK: - Helpers
     
