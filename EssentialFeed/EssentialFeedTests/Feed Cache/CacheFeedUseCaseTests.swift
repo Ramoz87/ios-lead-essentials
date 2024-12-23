@@ -11,13 +11,17 @@ import EssentialFeed
 class FeedStore {
     typealias DeletionCompletion = (Error?) -> Void
     
+    enum ReceivedMessage: Equatable {
+        case delete
+        case insert([FeedItem], Date)
+    }
+    
+    private(set) var commands = [ReceivedMessage]()
     private var deleteCompletions = [DeletionCompletion]()
-    var deleteCallCount: Int = 0
-    var insertions = [(items: [FeedItem], timestamp: Date)]()
     
     func deleteCachedFeed(completion: @escaping DeletionCompletion) {
-        deleteCallCount += 1
         deleteCompletions.append(completion)
+        commands.append(.delete)
     }
     
     func completeDelete(with error: Error?) {
@@ -25,7 +29,7 @@ class FeedStore {
     }
     
     func insert(_ items: [FeedItem], timeStamp: Date) {
-        insertions.append((items, timeStamp))
+        commands.append(.insert(items, timeStamp))
     }
 }
 
@@ -49,9 +53,9 @@ class LocalFeedLoader {
 
 final class CacheFeedUseCaseTests: XCTestCase {
 
-    func test_init_doesNotDeleteCache() {
+    func test_init_doesNotPerformAnyCommands() {
         let (_, store) = makeSUT()
-        XCTAssertEqual(store.deleteCallCount, 0)
+        XCTAssertEqual(store.commands, [])
     }
     
     func test_save_performaCacheDelete() {
@@ -59,7 +63,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
         let items = [uniqueItem(), uniqueItem()]
         sut.save(items)
         
-        XCTAssertEqual(store.deleteCallCount, 1)
+        XCTAssertEqual(store.commands, [.delete])
     }
     
     func test_save_errorOnDelete_doesNotInsertCache() {
@@ -70,7 +74,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
         sut.save(items)
         store.completeDelete(with: deleteError)
         
-        XCTAssertEqual(store.insertions.count, 0)
+        XCTAssertEqual(store.commands, [.delete])
     }
         
     func test_save_successOnDelete_insertCacheWithTimestamp() {
@@ -81,9 +85,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
         sut.save(items)
         store.completeDelete(with: nil)
         
-        XCTAssertEqual(store.insertions.count, 1)
-        XCTAssertEqual(store.insertions.first?.items, items)
-        XCTAssertEqual(store.insertions.first?.timestamp, timestamp)
+        XCTAssertEqual(store.commands, [.delete, .insert(items, timestamp)])
     }
     
     //MARK: - Helpers
