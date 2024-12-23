@@ -26,9 +26,14 @@ class LocalFeedLoader {
     }
     
     func save(_ items: [FeedItem], completion: @escaping (Error?) -> Void) {
-        store.deleteCachedFeed {[unowned self] error in
+        store.deleteCachedFeed { [weak self] error in
+            guard let self else { return }
+            
             if error == nil {
-                self.store.insert(items, timeStamp: self.currentDate(), completion: completion)
+                self.store.insert(items, timeStamp: self.currentDate()) { [weak self] error in
+                    guard self != nil else { return }
+                    completion(error)
+                }
             } else {
                 completion(error)
             }
@@ -43,7 +48,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
         XCTAssertEqual(store.commands, [])
     }
     
-    func test_save_performaCacheDelete() {
+    func test_save_performCacheDelete() {
         let (sut, store) = makeSUT()
         let items = [uniqueItem(), uniqueItem()]
         sut.save(items) { _ in }
@@ -100,6 +105,37 @@ final class CacheFeedUseCaseTests: XCTestCase {
             store.completeDelete(with: nil)
             store.completeInsert(with: nil)
         }
+    }
+    
+    func test_save_deallocatedBeforeDelete_errorOnDelete_notCompleteWithError() {
+        let store = FeedStoreSpy()
+        var sut: LocalFeedLoader? = LocalFeedLoader(store: store, date: Date.init)
+        
+        var receivedResults = [Error?]()
+        sut?.save([uniqueItem()]) {
+            receivedResults.append($0)
+        }
+        
+        sut = nil
+        store.completeDelete(with: anyNSError())
+        
+        XCTAssertTrue(receivedResults.isEmpty)
+    }
+    
+    func test_save_deallocatedBeforeInsert_errorOnInsert_notCompleteWithError() {
+        let store = FeedStoreSpy()
+        var sut: LocalFeedLoader? = LocalFeedLoader(store: store, date: Date.init)
+        
+        var receivedResults = [Error?]()
+        sut?.save([uniqueItem()]) {
+            receivedResults.append($0)
+        }
+        
+        store.completeDelete(with: nil)
+        sut = nil
+        store.completeInsert(with: anyNSError())
+        
+        XCTAssertTrue(receivedResults.isEmpty)
     }
     
     //MARK: - Helpers
