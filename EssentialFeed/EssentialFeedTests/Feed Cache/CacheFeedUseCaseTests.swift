@@ -8,39 +8,6 @@
 import XCTest
 import EssentialFeed
 
-protocol FeedStore {
-    typealias DeleteCompletion = (Error?) -> Void
-    typealias InsertCompletion = (Error?) -> Void
-    
-    func deleteCachedFeed(completion: @escaping DeleteCompletion)
-    func insert(_ items: [FeedItem], timeStamp: Date, completion: @escaping InsertCompletion)
-}
-
-class LocalFeedLoader {
-    let store: FeedStore
-    let currentDate: () -> Date
-    
-    init(store: FeedStore, date: @escaping () -> Date) {
-        self.store = store
-        self.currentDate = date
-    }
-    
-    func save(_ items: [FeedItem], completion: @escaping (Error?) -> Void) {
-        store.deleteCachedFeed { [weak self] error in
-            guard let self else { return }
-            
-            if error == nil {
-                self.store.insert(items, timeStamp: self.currentDate()) { [weak self] error in
-                    guard self != nil else { return }
-                    completion(error)
-                }
-            } else {
-                completion(error)
-            }
-        }
-    }
-}
-
 final class CacheFeedUseCaseTests: XCTestCase {
 
     func test_init_doesNotPerformAnyCommands() {
@@ -111,7 +78,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
         let store = FeedStoreSpy()
         var sut: LocalFeedLoader? = LocalFeedLoader(store: store, date: Date.init)
         
-        var receivedResults = [Error?]()
+        var receivedResults = [LocalFeedLoader.Result]()
         sut?.save([uniqueItem()]) {
             receivedResults.append($0)
         }
@@ -126,7 +93,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
         let store = FeedStoreSpy()
         var sut: LocalFeedLoader? = LocalFeedLoader(store: store, date: Date.init)
         
-        var receivedResults = [Error?]()
+        var receivedResults = [LocalFeedLoader.Result]()
         sut?.save([uniqueItem()]) {
             receivedResults.append($0)
         }
