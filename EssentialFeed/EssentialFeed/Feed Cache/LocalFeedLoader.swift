@@ -30,6 +30,10 @@ public final class LocalFeedLoader {
         }
     }
     
+    public func load() {
+        store.retrieve()
+    }
+    
     //MARK: - Private
     
     public func insert(_ feed: [FeedImage], completion: @escaping (Result) -> Void) {
