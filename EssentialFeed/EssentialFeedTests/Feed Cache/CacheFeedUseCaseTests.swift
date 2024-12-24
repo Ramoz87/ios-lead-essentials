@@ -17,7 +17,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
     
     func test_save_performCacheDelete() {
         let (sut, store) = makeSUT()
-        sut.save(uniqueItems().models) { _ in }
+        sut.save(uniqueImageFeed().models) { _ in }
         
         XCTAssertEqual(store.commands, [.delete])
     }
@@ -26,7 +26,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
         let (sut, store) = makeSUT()
         let deleteError = anyNSError()
         
-        sut.save(uniqueItems().models) { _ in }
+        sut.save(uniqueImageFeed().models) { _ in }
         store.completeDelete(with: deleteError)
         
         XCTAssertEqual(store.commands, [.delete])
@@ -34,7 +34,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
     
     func test_save_successOnDelete_insertCacheWithTimestamp() {
         let timestamp = Date()
-        let items = uniqueItems()
+        let items = uniqueImageFeed()
         let (sut, store) = makeSUT(currentDate: { timestamp })
         
         sut.save(items.models) { _ in }
@@ -77,7 +77,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
         var sut: LocalFeedLoader? = LocalFeedLoader(store: store, date: Date.init)
         
         var receivedResults = [LocalFeedLoader.Result]()
-        sut?.save(uniqueItems().models) {
+        sut?.save(uniqueImageFeed().models) {
             receivedResults.append($0)
         }
         
@@ -92,7 +92,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
         var sut: LocalFeedLoader? = LocalFeedLoader(store: store, date: Date.init)
         
         var receivedResults = [LocalFeedLoader.Result]()
-        sut?.save(uniqueItems().models) {
+        sut?.save(uniqueImageFeed().models) {
             receivedResults.append($0)
         }
         
@@ -105,13 +105,13 @@ final class CacheFeedUseCaseTests: XCTestCase {
     
     //MARK: - Helpers
     
-    private func uniqueItem() -> FeedItem {
-        return FeedItem(id: UUID(), description: "any", location: "any", imageURL: anyURL())
+    private func uniqueImage() -> FeedImage {
+        return FeedImage(id: UUID(), description: "any", location: "any", url: anyURL())
     }
     
-    private func uniqueItems() -> (models: [FeedItem], local: [LocalFeedItem]) {
-        let models = [uniqueItem(), uniqueItem()]
-        let local = models.map { LocalFeedItem(id: $0.id, description: $0.description, location: $0.location, imageURL: $0.imageURL) }
+    private func uniqueImageFeed() -> (models: [FeedImage], local: [LocalFeedImage]) {
+        let models = [uniqueImage(), uniqueImage()]
+        let local = models.map { LocalFeedImage(id: $0.id, description: $0.description, location: $0.location, url: $0.url) }
         return (models, local)
     }
     
@@ -126,10 +126,9 @@ final class CacheFeedUseCaseTests: XCTestCase {
     private func expect(_ sut: LocalFeedLoader, completeWithError expectedError: NSError?, when action: () -> Void, file: StaticString = #file, line: UInt = #line) {
         
         var receivedError: Error?
-        let items = [uniqueItem(), uniqueItem()]
         
         let exp = expectation(description: "Wait for save completion")
-        sut.save(items) { error in
+        sut.save(uniqueImageFeed().models) { error in
             receivedError = error
             exp.fulfill()
         }
@@ -144,7 +143,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
         
         enum ReceivedMessage: Equatable {
             case delete
-            case insert([LocalFeedItem], Date)
+            case insert([LocalFeedImage], Date)
         }
         
         private(set) var commands = [ReceivedMessage]()
@@ -160,7 +159,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
             deleteCompletions.last?(error)
         }
         
-        func insert(_ items: [LocalFeedItem], timeStamp: Date, completion: @escaping InsertCompletion) {
+        func insert(_ items: [LocalFeedImage], timeStamp: Date, completion: @escaping InsertCompletion) {
             insertCompletions.append(completion)
             commands.append(.insert(items, timeStamp))
         }
