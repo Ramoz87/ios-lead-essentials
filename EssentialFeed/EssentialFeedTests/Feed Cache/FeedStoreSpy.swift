@@ -44,7 +44,15 @@ class FeedStoreSpy: FeedStore {
         commands.append(.retrieve)
     }
     
-    func completeRetrieve(with error: Error?) {
-        retrieveCompletions.last?(error)
+    func completeRetrieve(with error: Error) {
+        retrieveCompletions.last?(.failure(error))
+    }
+    
+    func completeRetrieveWithEmptyCache() {
+        retrieveCompletions.last?(.empty)
+    }
+    
+    func completeRetrieve(with feed: [LocalFeedImage], timestamp: Date) {
+        retrieveCompletions.last?(.found(feed: feed, timestamp: timestamp))
     }
 }
