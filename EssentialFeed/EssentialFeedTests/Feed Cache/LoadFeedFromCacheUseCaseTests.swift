@@ -130,6 +130,18 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
     }
     
     
+    func test_load_deallocatedBeforeCompletion_doesNotComplete() {
+        let store = FeedStoreSpy()
+        var sut: LocalFeedLoader? = LocalFeedLoader(store: store, date: Date.init)
+        
+        var receivedResults = [LocalFeedLoader.LoadResult]()
+        sut?.load { receivedResults.append($0) }
+        sut = nil
+        store.completeRetrieveWithEmptyCache()
+        
+        XCTAssertTrue(receivedResults.isEmpty)
+    }
+    
     //MARK: - Helpers
         
     private func makeSUT(currentDate: @escaping () -> Date = Date.init, file: StaticString = #file, line: UInt = #line) -> (sut: LocalFeedLoader, store: FeedStoreSpy) {
