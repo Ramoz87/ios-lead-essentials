@@ -30,7 +30,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         }
     }
     
-    func test_load_errorOnRetrieve_hasNoSideEffect() {
+    func test_load_errorOnRetrieve_hasNoSideEffects() {
         let (sut, store) = makeSUT()
         let retrievalError = anyNSError()
 
@@ -48,7 +48,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         }
     }
     
-    func test_load_emptyCache_doesNotDeleteCache() {
+    func test_load_emptyCache_hasNoSideEffects() {
         let (sut, store) = makeSUT()
         
         sut.load { _ in }
