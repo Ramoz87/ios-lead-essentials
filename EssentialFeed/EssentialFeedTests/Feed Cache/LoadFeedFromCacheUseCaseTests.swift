@@ -21,6 +21,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         XCTAssertEqual(store.commands, [.retrieve])
     }
     
+    
     func test_load_errorOnRetrieve_completeWithError() {
         let (sut, store) = makeSUT()
         let retrievalError = anyNSError()
@@ -39,12 +40,21 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         XCTAssertEqual(store.commands, [.retrieve, .delete])
     }
     
+    
     func test_load_emptyCache_completeWithEmptyResult() {
         let (sut, store) = makeSUT()
         expect(sut, completeWith: .success([])) {
             store.completeRetrieveWithEmptyCache()
         }
     }
+    
+    func test_load_emptyCache_doesNotPerformDeleteCommand() {
+        let (sut, store) = makeSUT()
+        sut.load { _ in }
+        store.completeRetrieveWithEmptyCache()
+        XCTAssertEqual(store.commands, [.retrieve])
+    }
+    
     
     func test_load_lessThanSevenDaysOldCache_completeWithResult() {
         let feed = uniqueImageFeed()
