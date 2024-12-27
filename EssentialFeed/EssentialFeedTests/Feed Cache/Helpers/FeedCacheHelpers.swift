@@ -27,3 +27,13 @@ extension Date {
         return self + seconds
     }
 }
+
+extension Date {
+    private var feedCacheMaxAgeInDays: Int {
+        return 7
+    }
+    
+    func maxFeedCacheAge() -> Date {
+        return adding(days: -feedCacheMaxAgeInDays)
+    }
+}
