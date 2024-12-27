@@ -73,17 +73,15 @@ final class CodableFeedStoreTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        
-        try? FileManager.default.removeItem(at: testStoreUrl)
+        setupEmptyStoreState()
     }
     
     override func tearDown() {
         super.tearDown()
-        
-        try? FileManager.default.removeItem(at: testStoreUrl)
+        undoStoreSideEffects()
     }
     
-    func test_retrieve_emptyCache_deliverEmptyResult(){
+    func test_retrieve_fromEmptyCache_deliverEmptyResult(){
         let sut = makeSUT()
         
         let exp = expectation(description: "Wait for cache retrieval")
@@ -101,7 +99,7 @@ final class CodableFeedStoreTests: XCTestCase {
         wait(for: [exp], timeout: 1)
     }
     
-    func test_retrieve_emptyCacheTwice_deliverEmptyResultTwice(){
+    func test_retrieve_fromEmptyCacheTwice_deliverEmptyResultTwice(){
         let sut = makeSUT()
         
         let exp = expectation(description: "Wait for cache retrieval")
@@ -148,7 +146,6 @@ final class CodableFeedStoreTests: XCTestCase {
         wait(for: [exp], timeout: 1.0)
     }
     
-    
     //MARK: - Helpers
     
     private func makeSUT(file: StaticString = #file, line: UInt = #line) -> CodableFeedStore {
@@ -159,5 +156,17 @@ final class CodableFeedStoreTests: XCTestCase {
     
     private var testStoreUrl: URL {
         FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!.appendingPathComponent("\(type(of: self)).store")
+    }
+    
+    private func setupEmptyStoreState() {
+        deleteStoreArtifacts()
+    }
+    
+    private func undoStoreSideEffects() {
+        deleteStoreArtifacts()
+    }
+    
+    private func deleteStoreArtifacts() {
+        try? FileManager.default.removeItem(at: testStoreUrl)
     }
 }
