@@ -30,9 +30,9 @@ class FeedStoreSpy: FeedStore {
         deleteCompletions.last?(error)
     }
     
-    func insert(_ items: [LocalFeedImage], timeStamp: Date, completion: @escaping InsertCompletion) {
+    func insert(_ items: [LocalFeedImage], timestamp: Date, completion: @escaping InsertCompletion) {
         insertCompletions.append(completion)
-        commands.append(.insert(items, timeStamp))
+        commands.append(.insert(items, timestamp))
     }
     
     func completeInsert(with error: Error?) {
