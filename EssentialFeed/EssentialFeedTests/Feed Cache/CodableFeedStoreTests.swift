@@ -48,8 +48,12 @@ final class CodableFeedStore {
             return completion(nil)
         }
         
-        try! FileManager.default.removeItem(at: storeUrl)
-        completion(nil)
+        do {
+            try FileManager.default.removeItem(at: storeUrl)
+            completion(nil)
+        } catch {
+            completion(error)
+        }
     }
 }
 
@@ -178,8 +182,8 @@ final class CodableFeedStoreTests: XCTestCase {
         let sut = makeSUT()
         
         let deletionError = delete(from: sut)
+       
         XCTAssertNil(deletionError, "Expected empty cache deletion to succeed")
-        
         expect(sut, retrieve: .empty)
     }
     
@@ -190,9 +194,17 @@ final class CodableFeedStoreTests: XCTestCase {
         
         insert(feed: feed, timestamp: timestamp, to: sut)
         let deletionError = delete(from: sut)
-        XCTAssertNil(deletionError, "Expected non-empty cache deletion to succeed")
         
+        XCTAssertNil(deletionError, "Expected non-empty cache deletion to succeed")
         expect(sut, retrieve: .empty)
+    }
+    
+    func test_delete_noPermission_deliverError() {
+        let noDeletePermissionURL = cachesDirectory
+        let sut = makeSUT(url: noDeletePermissionURL)
+        
+        let deletionError = delete(from: sut)
+        XCTAssertNotNil(deletionError, "Expected cache deletion to fail")
     }
     
     //MARK: - Helpers
@@ -204,7 +216,11 @@ final class CodableFeedStoreTests: XCTestCase {
     }
     
     private var testStoreUrl: URL {
-        FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!.appendingPathComponent("\(type(of: self)).store")
+        cachesDirectory.appendingPathComponent("\(type(of: self)).store")
+    }
+    
+    private var cachesDirectory: URL {
+        return FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
     }
     
     private func setupEmptyStoreState() {
@@ -260,6 +276,7 @@ final class CodableFeedStoreTests: XCTestCase {
         return error
     }
     
+    @discardableResult
     private func delete(from sut: CodableFeedStore) -> Error? {
         let exp = expectation(description: "Wait for cache delete")
         var error: Error?
