@@ -89,7 +89,8 @@ final class CoreDataFeedStoreTests: XCTestCase, FailableFeedStoreSpecs {
     }
     
     func test_sideEffectOperationsRunSerially() {
-        
+        let sut = makeSUT()
+        assertThatSideEffectsRunSerially(on: sut)
     }
     
     //MARK: - Helpers
