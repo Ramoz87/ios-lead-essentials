@@ -10,9 +10,11 @@ import CoreData
 final public class CoreDataFeedStore: FeedStore {
     
     private let container: NSPersistentContainer
+    private let context: NSManagedObjectContext
     
-    public init(bundle: Bundle = .main) throws {
-        container = try NSPersistentContainer.load(modelName: "FeedCache", in: bundle)
+    public init(storeUrl: URL, bundle: Bundle = .main) throws {
+        container = try NSPersistentContainer.load(modelName: "FeedCache", url: storeUrl, in: bundle)
+        context = container.newBackgroundContext()
     }
     
     
@@ -35,13 +37,15 @@ private extension NSPersistentContainer {
         case failedToLoadPersistentStores(Swift.Error)
     }
 
-    static func load(modelName name: String, in bundle: Bundle) throws -> NSPersistentContainer {
+    static func load(modelName name: String, url: URL, in bundle: Bundle) throws -> NSPersistentContainer {
         guard let model = NSManagedObjectModel.with(name: name, in: bundle) else {
             throw Error.modelNotFound
         }
 
-        let container = NSPersistentContainer(name: name, managedObjectModel: model)
         var loadError: Swift.Error?
+        let description = NSPersistentStoreDescription(url: url)
+        let container = NSPersistentContainer(name: name, managedObjectModel: model)
+        container.persistentStoreDescriptions = [description]
         container.loadPersistentStores { loadError = $1 }
         try loadError.map { throw Error.failedToLoadPersistentStores($0) }
 
