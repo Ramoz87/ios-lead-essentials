@@ -8,30 +8,7 @@
 import XCTest
 import EssentialFeed
 
-final class CoreDataFeedStoreTests: XCTestCase, FailableFeedStoreSpecs {
-    func test_retrieve_retrieveError_deliverError() {
-        
-    }
-    
-    func test_retrieve_retrieveError_noSideEffect() {
-        
-    }
-    
-    func test_insert_insertError_deliverError() {
-        
-    }
-    
-    func test_insert_insertError_noSideEffect() {
-        
-    }
-    
-    func test_delete_deleteError_deliverError() {
-        
-    }
-    
-    func test_delete_deleteError_noSideEffect() {
-        
-    }
+final class CoreDataFeedStoreTests: XCTestCase, FeedStoreSpecs {
     
     func test_retrieve_emptyCache_deliverEmptyResult() {
         let sut = makeSUT()
