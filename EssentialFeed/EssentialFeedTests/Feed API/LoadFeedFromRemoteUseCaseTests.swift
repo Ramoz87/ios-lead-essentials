@@ -57,7 +57,7 @@ final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
     
     func test_load_with200HTTPCodeAndEmptyJSON_shouldDeliverEmptyResult() {
         let (sut, client) = makeSut()
-        let items = [FeedItem]()
+        let items = [FeedImage]()
         expect(sut, completeWith: .success(items)) {
             client.complete(withCode: 200, data: makeJSON(items))
         }
@@ -66,12 +66,12 @@ final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
     func test_load_with200HTTPCodeAndNotEmptyJSON_shouldDeliverResult() {
         let (sut, client) = makeSut()
         let item1 = makeItem(id: UUID(),
-                             imageURL: URL(string: "http://a-url.com")!)
+                             url: URL(string: "http://a-url.com")!)
         
         let item2 = makeItem(id: UUID(),
                              description: "a description",
                              location: "a location",
-                             imageURL: URL(string: "http://another-url.com")!)
+                             url: URL(string: "http://another-url.com")!)
         
         let items = [item1, item2]
         expect(sut, completeWith: .success(items)) {
@@ -103,17 +103,17 @@ final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
         return (sut, client)
     }
         
-    private func makeItem(id: UUID, description: String? = nil, location: String? = nil, imageURL: URL) -> FeedItem {
-        return FeedItem(id: id, description: description, location: location, imageURL: imageURL)
+    private func makeItem(id: UUID, description: String? = nil, location: String? = nil, url: URL) -> FeedImage {
+        return FeedImage(id: id, description: description, location: location, url: url)
     }
     
-    private func makeJSON(_ items: [FeedItem]) -> Data {
+    private func makeJSON(_ items: [FeedImage]) -> Data {
         let jsonItems = items.map { item in
             [
                 "id": item.id.uuidString,
                 "description": item.description,
                 "location": item.location,
-                "image": item.imageURL.absoluteString
+                "image": item.url.absoluteString
             ].compactMapValues { $0 }
         }
         let json = ["items": jsonItems]
