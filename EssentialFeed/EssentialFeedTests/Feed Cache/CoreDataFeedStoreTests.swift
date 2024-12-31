@@ -44,7 +44,8 @@ final class CoreDataFeedStoreTests: XCTestCase, FailableFeedStoreSpecs {
     }
     
     func test_retrieve_noEmptyCache_deliverCache() {
-        
+        let sut = makeSUT()
+        assertThatRetrieveDeliversFoundValuesOnNonEmptyCache(on: sut)
     }
     
     func test_retrieve_noEmptyCache_noSideEffect() {
@@ -83,7 +84,7 @@ final class CoreDataFeedStoreTests: XCTestCase, FailableFeedStoreSpecs {
         
     }
     
-    // - MARK: Helpers
+    //MARK: - Helpers
     
     private func makeSUT(file: StaticString = #file, line: UInt = #line) -> FeedStore {
         let bundle = Bundle(for: CoreDataFeedStore.self)
