@@ -17,11 +17,11 @@ public class URLSessionHTTPClient: HTTPClient {
     
     private struct UnexpectedError: Error {}
     
-    public func get(from url: URL, completeion: @escaping (HTTPClientResult) -> Void) {
+    public func get(from url: URL, completeion: @escaping (HTTPClient.Result) -> Void) {
         let request = URLRequest(url: url)
         session.dataTask(with: request) { data, response, error in
             if let data, let response = response as? HTTPURLResponse {
-                completeion(.success(data, response))
+                completeion(.success((data, response)))
             } else if let error {
                 completeion(.failure(error))
             } else {
