@@ -19,48 +19,31 @@ final public class CoreDataFeedStore: FeedStore {
     
     public func retrieve(completion: @escaping RetrieveCompletion) {
         perform { context in
-            do {
-                if let cache = try ManagedCache.find(in: context) {
-                    completion(.success(CachedFeed(feed: cache.localFeed, timestamp: cache.timestamp)))
-                } else {
-                    completion(.success(nil))
-                }
-            } catch {
-                completion(.failure(error))
-            }
+            completion(Result {
+                try ManagedCache.find(in: context).map { CachedFeed(feed: $0.localFeed, timestamp: $0.timestamp) }
+            })
         }
     }
     
     public func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertCompletion) {
         perform { context in
-            do {
-                
+            completion(Result {
                 if let cache = try ManagedCache.find(in: context) {
                     context.delete(cache)
                 }
                 let managedCache = ManagedCache(context: context)
                 managedCache.timestamp = timestamp
                 managedCache.feed = ManagedFeedImage.images(from: feed, in: context)
-                
                 try context.save()
-                completion(.success(()))
-            } catch {
-                completion(.failure(error))
-            }
+            })
         }
     }
     
     public func deleteCachedFeed(completion: @escaping DeleteCompletion) {
         perform { context in
-            do {
-                if let cache = try ManagedCache.find(in: context) {
-                    context.delete(cache)
-                    try context.save()
-                }
-                completion(.success(()))
-            } catch {
-                completion(.failure(error))
-            }
+            completion(Result {
+                try ManagedCache.find(in: context).map(context.delete).map(context.save)
+            })
         }
     }
     
