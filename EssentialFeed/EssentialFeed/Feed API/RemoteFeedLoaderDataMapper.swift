@@ -7,13 +7,13 @@
 
 import Foundation
 
-internal final class RemoteFeedLoaderDataMapper {
+final class RemoteFeedLoaderDataMapper {
     
     private struct Result: Decodable {
         let items: [RemoteFeedItem]
     }
 
-    internal static func map(_ data: Data, _ response: HTTPURLResponse) throws -> [RemoteFeedItem] {
+    static func map(_ data: Data, _ response: HTTPURLResponse) throws -> [RemoteFeedItem] {
         let successCodes = Range(uncheckedBounds: (200, 300))
         guard successCodes.contains(response.statusCode),
               let result = try? JSONDecoder().decode(Result.self, from: data) else {
