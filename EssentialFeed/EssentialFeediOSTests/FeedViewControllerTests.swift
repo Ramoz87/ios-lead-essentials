@@ -36,16 +36,13 @@ private class FeedViewController: UITableViewController {
 }
 
 private extension FeedViewController {
-    
     func replaceRefreshControlWithFakeForiOS17() {
         let fakeRefreshControl = FakeRefreshControl()
-        
         refreshControl?.allTargets.forEach { target in
             refreshControl?.actions(forTarget: target, forControlEvent: .valueChanged)?.forEach {
                 fakeRefreshControl.addTarget(target, action: Selector($0), for: .valueChanged)
             }
         }
-        
         refreshControl = fakeRefreshControl
     }
 }
@@ -96,6 +93,7 @@ final class FeedViewControllerTests: XCTestCase {
     
     func test_viewDidLoad_showsLoadingIndicator() {
         let (sut, _) = makeSUT()
+        
         sut.loadViewIfNeeded()
         sut.replaceRefreshControlWithFakeForiOS17()
         sut.beginAppearanceTransition(true, animated: false)
@@ -115,10 +113,18 @@ final class FeedViewControllerTests: XCTestCase {
         XCTAssertEqual(sut.refreshControl?.isRefreshing, false)
     }
     
+    func test_pullToRefresh_showsLoadingIndicator() {
+        let (sut, _) = makeSUT()
+        
+        sut.replaceRefreshControlWithFakeForiOS17()
+        sut.refreshControl?.simulatePullToRefresh()
+        
+        XCTAssertEqual(sut.refreshControl?.isRefreshing, true)
+    }
+    
     func test_pullToRefresh_loadsFeed() {
         let (sut, loader) = makeSUT()
         
-        sut.loadViewIfNeeded()
         sut.refreshControl?.simulatePullToRefresh()
         
         XCTAssertEqual(loader.loadCallCount, 1)
