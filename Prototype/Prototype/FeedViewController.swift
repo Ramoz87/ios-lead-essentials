@@ -15,16 +15,12 @@ struct FeedImageViewModel {
 
 class FeedViewController: UITableViewController {
 
-    private let model = FeedImageViewModel.prototypeFeed
+    private var model = [FeedImageViewModel]()
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem
+    override func viewIsAppearing(_ animated: Bool) {
+        super.viewIsAppearing(animated)
+        
+        refresh()
     }
 
     // MARK: - Table view data source
@@ -38,6 +34,19 @@ class FeedViewController: UITableViewController {
         let model = self.model[indexPath.row]
         cell.configure(with: model)
         return cell
+    }
+    
+    //MARK: - Actions
+    
+    @IBAction func refresh() {
+        refreshControl?.beginRefreshing()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            if self.model.isEmpty {
+                self.model = FeedImageViewModel.prototypeFeed
+                self.tableView.reloadData()
+            }
+            self.refreshControl?.endRefreshing()
+        }
     }
 }
 
