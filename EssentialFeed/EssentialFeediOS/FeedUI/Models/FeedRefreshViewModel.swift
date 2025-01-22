@@ -5,7 +5,6 @@
 //  Created by Yury Ramazanov on 22.01.2025.
 //
 
-import UIKit
 import EssentialFeed
 
 public final class FeedRefreshViewModel {
