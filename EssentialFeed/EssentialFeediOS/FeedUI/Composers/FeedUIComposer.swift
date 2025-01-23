@@ -12,9 +12,11 @@ public final class FeedUIComposer {
     private init() {}
 
     public static func feedViewController(feedLoader: FeedLoader, imageLoader: FeedImageDataLoader) -> FeedViewController {
-        let presenter = FeedPresenter(feedLoader: feedLoader)
+        let presenter = FeedPresenter()
         
-        let refreshController = FeedRefreshViewController(load: presenter.loadFeed)
+        let presenterAdapter = FeedPresenterAdapter(feedLoader: feedLoader, presenter: presenter)
+        let refreshController = FeedRefreshViewController(load: presenterAdapter.loadFeed)
+        
         let feedController = FeedViewController(refreshController: refreshController)
         
         presenter.loadingView = WeakReference(object: refreshController)
@@ -52,6 +54,31 @@ private struct FeedViewAdapter: FeedView {
             FeedImageCellController(viewModel: FeedImageCellViewModel(model: $0,
                                                                       imageLoader: imageLoader,
                                                                       imageTransformer: UIImage.init))
+        }
+    }
+}
+
+private struct FeedPresenterAdapter {
+    private let feedLoader: FeedLoader
+    private let presenter: FeedPresenter
+    
+    init(feedLoader: FeedLoader, presenter: FeedPresenter) {
+        self.feedLoader = feedLoader
+        self.presenter = presenter
+    }
+    
+    func loadFeed() {
+        presenter.didStartLoadingFeed()
+        
+        feedLoader.load { [weak presenter] result in
+            
+            switch result {
+            case let .success(feed):
+                presenter?.didFinishLoadingFeed(with: feed)
+                
+            case let .failure(error):
+                presenter?.didFinishLoadingFeed(with: error)
+            }
         }
     }
 }
