@@ -7,8 +7,15 @@
 
 import EssentialFeed
 
-public final class FeedRefreshViewModel {
-    typealias Observer<T> = (T) -> Void
+protocol FeedLoadingView {
+    func display(isLoading: Bool)
+}
+
+protocol FeedView {
+    func display(feed: [FeedImage])
+}
+
+public final class FeedPresenter {
     
     private let feedLoader: FeedLoader
     
@@ -16,17 +23,17 @@ public final class FeedRefreshViewModel {
         self.feedLoader = feedLoader
     }
     
-    var onLoadingStateChange: Observer<Bool>?
-    var onFeedLoaded: Observer<[FeedImage]>?
-
+    var feedView: FeedView?
+    var loadingView: FeedLoadingView?
+    
     func loadFeed() {
-        onLoadingStateChange?(true)
+        loadingView?.display(isLoading: true)
         feedLoader.load { [weak self] result in
             if let feed = try? result.get() {
-                self?.onFeedLoaded?(feed)
+                self?.feedView?.display(feed: feed)
             }
 
-            self?.onLoadingStateChange?(false)
+            self?.loadingView?.display(isLoading: false)
         }
     }
 }

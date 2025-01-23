@@ -12,20 +12,46 @@ public final class FeedUIComposer {
     private init() {}
 
     public static func feedViewController(feedLoader: FeedLoader, imageLoader: FeedImageDataLoader) -> FeedViewController {
-        let viewModel = FeedRefreshViewModel(feedLoader: feedLoader)
-        let refreshController = FeedRefreshViewController(viewModel: viewModel)
-        let ctrl = FeedViewController(refreshController: refreshController)
-        viewModel.onFeedLoaded = adaptFeedToCellControllers(forwardingTo: ctrl, loader: imageLoader)
-        return ctrl
-    }
-    
-    private static func adaptFeedToCellControllers(forwardingTo controller: FeedViewController, loader: FeedImageDataLoader) -> ([FeedImage]) -> Void {
-        return { [weak controller] feed in
-            controller?.tableModel = feed.map {
-                FeedImageCellController(viewModel: FeedImageCellViewModel(model: $0, imageLoader: loader, imageTransformer: UIImage.init))
-            }
-        }
+        let presenter = FeedPresenter(feedLoader: feedLoader)
+        
+        let refreshController = FeedRefreshViewController(presenter: presenter)
+        let feedController = FeedViewController(refreshController: refreshController)
+        
+        presenter.loadingView = WeakReference(object: refreshController)
+        presenter.feedView = FeedViewAdapter(controller: feedController, imageLoader: imageLoader)
+        
+        return feedController
     }
 }
 
+private struct WeakReference<T: AnyObject> {
+    private weak var object: T?
+    
+    init(object: T) {
+        self.object = object
+    }
+}
 
+extension WeakReference: FeedLoadingView where T: FeedLoadingView {
+    func display(isLoading: Bool) {
+        object?.display(isLoading: isLoading)
+    }
+}
+
+private struct FeedViewAdapter: FeedView {
+    private weak var controller: FeedViewController?
+    private let imageLoader: FeedImageDataLoader
+    
+    init(controller: FeedViewController, imageLoader: FeedImageDataLoader) {
+        self.controller = controller
+        self.imageLoader = imageLoader
+    }
+    
+    func display(feed: [EssentialFeed.FeedImage]) {
+        controller?.tableModel = feed.map {
+            FeedImageCellController(viewModel: FeedImageCellViewModel(model: $0,
+                                                                      imageLoader: imageLoader,
+                                                                      imageTransformer: UIImage.init))
+        }
+    }
+}
