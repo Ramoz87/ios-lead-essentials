@@ -33,8 +33,8 @@ private struct WeakReference<T: AnyObject> {
 }
 
 extension WeakReference: FeedLoadingView where T: FeedLoadingView {
-    func display(isLoading: Bool) {
-        object?.display(isLoading: isLoading)
+    func display(_ model: FeedLoadingViewModel) {
+        object?.display(model)
     }
 }
 
@@ -47,8 +47,8 @@ private struct FeedViewAdapter: FeedView {
         self.imageLoader = imageLoader
     }
     
-    func display(feed: [EssentialFeed.FeedImage]) {
-        controller?.tableModel = feed.map {
+    func display(_ model: FeedViewModel) {
+        controller?.tableModel = model.feed.map {
             FeedImageCellController(viewModel: FeedImageCellViewModel(model: $0,
                                                                       imageLoader: imageLoader,
                                                                       imageTransformer: UIImage.init))
