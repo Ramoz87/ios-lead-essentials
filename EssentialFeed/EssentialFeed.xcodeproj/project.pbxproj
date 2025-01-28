@@ -488,8 +488,8 @@
 		B78F907F2D3FCAAF009C91B7 /* FeedUI */ = {
 			isa = PBXGroup;
 			children = (
-				B7CE2B542D3939EC001E24CD /* FeedUIIntegrationTests.swift */,
 				B78F906B2D3FC52A009C91B7 /* Helpers */,
+				B7CE2B542D3939EC001E24CD /* FeedUIIntegrationTests.swift */,
 			);
 			path = FeedUI;
 			sourceTree = "<group>";
