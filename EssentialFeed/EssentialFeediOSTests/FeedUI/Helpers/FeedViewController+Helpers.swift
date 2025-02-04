@@ -13,6 +13,10 @@ extension FeedViewController {
     var isShowingLoadingIndicator: Bool {
         return refreshControl?.isRefreshing == true
     }
+    
+    var errorMessage: String? {
+        return errorView?.message
+    }
 
     private var feedImagesSection: Int {
         return 0
