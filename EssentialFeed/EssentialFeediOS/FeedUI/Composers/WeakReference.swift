@@ -26,3 +26,9 @@ extension WeakReference: FeedImageView where T: FeedImageView, T.Image == UIImag
         object?.display(model)
     }
 }
+
+extension WeakReference: FeedErrorView where T: FeedErrorView {
+    func display(_ model: FeedErrorViewModel) {
+        object?.display(model)
+    }
+}

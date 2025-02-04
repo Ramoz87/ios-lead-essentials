@@ -17,7 +17,8 @@ public final class FeedUIComposer {
                                                     title: FeedPresenter.title)
         presenterAdapter.presenter = FeedPresenter(feedView: FeedViewAdapter(controller: feedController,
                                                                              imageLoader: MainQueueDispatchDecorator(decoratee:imageLoader)),
-                                                   loadingView: WeakReference(object: feedController))
+                                                   loadingView: WeakReference(object: feedController),
+                                                   errorView: WeakReference(object: feedController))
         return feedController
     }
     
