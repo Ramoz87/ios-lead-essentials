@@ -40,11 +40,7 @@ public class FeedViewController: UITableViewController, UITableViewDataSourcePre
     }
     
     func display(_ model: FeedLoadingViewModel) {
-        if model.isLoading {
-            refreshControl?.beginRefreshing()
-        } else {
-            refreshControl?.endRefreshing()
-        }
+        refreshControl?.update(isRefreshing: model.isLoading)
     }
     
     func display(_ viewModel: FeedErrorViewModel) {
