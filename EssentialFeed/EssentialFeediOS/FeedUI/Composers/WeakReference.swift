@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import EssentialFeed
 
 struct WeakReference<T: AnyObject> {
     private weak var object: T?
@@ -16,8 +17,8 @@ struct WeakReference<T: AnyObject> {
 }
 
 extension WeakReference: FeedLoadingView where T: FeedLoadingView {
-    func display(_ model: FeedLoadingViewModel) {
-        object?.display(model)
+    func display(_ viewModel: FeedLoadingViewModel) {
+        object?.display(viewModel)
     }
 }
 
@@ -28,7 +29,7 @@ extension WeakReference: FeedImageView where T: FeedImageView, T.Image == UIImag
 }
 
 extension WeakReference: FeedErrorView where T: FeedErrorView {
-    func display(_ model: FeedErrorViewModel) {
-        object?.display(model)
+    func display(_ viewModel: FeedErrorViewModel) {
+        object?.display(viewModel)
     }
 }

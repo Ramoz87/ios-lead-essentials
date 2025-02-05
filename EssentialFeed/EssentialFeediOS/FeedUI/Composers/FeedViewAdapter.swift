@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import EssentialFeed
 
 final class FeedViewAdapter: FeedView {
     private weak var controller: FeedViewController?
@@ -16,8 +17,8 @@ final class FeedViewAdapter: FeedView {
         self.imageLoader = imageLoader
     }
     
-    func display(_ model: FeedViewModel) {
-        controller?.tableModel = model.feed.map { model in
+    func display(_ viewModel: FeedViewModel) {
+        controller?.tableModel = viewModel.feed.map { model in
             let adapter = FeedImagePresenterAdapter<WeakReference<FeedImageCellController>, UIImage>(model: model, imageLoader: imageLoader)
            
             let ctrl = FeedImageCellController(delegate: adapter)
