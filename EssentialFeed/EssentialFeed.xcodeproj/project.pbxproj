@@ -54,7 +54,6 @@
 		B78F90792D3FC794009C91B7 /* FeedImageCell+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B78F90782D3FC78E009C91B7 /* FeedImageCell+Helpers.swift */; };
 		B78F907B2D3FC8EB009C91B7 /* LoaderSpy.swift in Sources */ = {isa = PBXBuildFile; fileRef = B78F907A2D3FC8E8009C91B7 /* LoaderSpy.swift */; };
 		B78F907D2D3FC987009C91B7 /* FeedUIIntegrationTests+Assertions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B78F907C2D3FC981009C91B7 /* FeedUIIntegrationTests+Assertions.swift */; };
-		B78F90832D3FCB0A009C91B7 /* FeedImageDataLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B78F90822D3FCB04009C91B7 /* FeedImageDataLoader.swift */; };
 		B78F90872D3FDD10009C91B7 /* FeedImageCellController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B78F90862D3FDD0F009C91B7 /* FeedImageCellController.swift */; };
 		B78F908A2D3FDE8E009C91B7 /* FeedUIComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B78F90892D3FDE88009C91B7 /* FeedUIComposer.swift */; };
 		B7A2B4E22D22F3FD00127C8C /* FeedStoreSpecs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7A2B4E12D22F3F800127C8C /* FeedStoreSpecs.swift */; };
@@ -88,6 +87,7 @@
 		B7DD8B0D2D19907200E76A95 /* SharedHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7DD8B0B2D19906700E76A95 /* SharedHelpers.swift */; };
 		B7DD8B102D19B3B600E76A95 /* FeedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7DD8B0F2D19B3B300E76A95 /* FeedStore.swift */; };
 		B7DD8B122D19B3D700E76A95 /* LocalFeedLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7DD8B112D19B3D600E76A95 /* LocalFeedLoader.swift */; };
+		B7EF34292D64BB4B005A574C /* FeedImageDataLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B78F90822D3FCB04009C91B7 /* FeedImageDataLoader.swift */; };
 		B7F5FF8E2D3E8B4C00734A23 /* SharedHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7DD8B0B2D19906700E76A95 /* SharedHelpers.swift */; };
 		B7F5FF902D3E8CF400734A23 /* FeedImageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F5FF8F2D3E8CEE00734A23 /* FeedImageCell.swift */; };
 		B7F5FFA62D3E96DD00734A23 /* UIView+Shimmering.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F5FFA52D3E96D800734A23 /* UIView+Shimmering.swift */; };
@@ -340,6 +340,7 @@
 			children = (
 				080EDF0B21B6DAE800813479 /* FeedImage.swift */,
 				080EDF0D21B6DCB600813479 /* FeedLoader.swift */,
+				B78F90822D3FCB04009C91B7 /* FeedImageDataLoader.swift */,
 			);
 			path = "Feed Feature";
 			sourceTree = "<group>";
@@ -347,7 +348,6 @@
 		B703376D2D37FC20005D8200 /* EssentialFeediOS */ = {
 			isa = PBXGroup;
 			children = (
-				B78F90812D3FCAED009C91B7 /* FeedImageLoader */,
 				B78F907E2D3FCA71009C91B7 /* FeedUI */,
 			);
 			path = EssentialFeediOS;
@@ -495,14 +495,6 @@
 				B7CE2B542D3939EC001E24CD /* FeedUIIntegrationTests.swift */,
 			);
 			path = FeedUI;
-			sourceTree = "<group>";
-		};
-		B78F90812D3FCAED009C91B7 /* FeedImageLoader */ = {
-			isa = PBXGroup;
-			children = (
-				B78F90822D3FCB04009C91B7 /* FeedImageDataLoader.swift */,
-			);
-			path = FeedImageLoader;
 			sourceTree = "<group>";
 		};
 		B78F90882D3FDE78009C91B7 /* Composers */ = {
@@ -882,6 +874,7 @@
 				B753953D2D1AD89900DE8A69 /* LocalFeedImage.swift in Sources */,
 				B769FF5B2D0B147C005D7CA2 /* RemoteFeedLoaderDataMapper.swift in Sources */,
 				B748BF862D24064C00E00B93 /* CoreDataFeedStore.swift in Sources */,
+				B7EF34292D64BB4B005A574C /* FeedImageDataLoader.swift in Sources */,
 				B7D6D7D42D5360C600965599 /* FeedLoadingViewModel.swift in Sources */,
 				B7D6D7DC2D5371D700965599 /* FeedImagePresenter.swift in Sources */,
 				B7D6D7CF2D535FEE00965599 /* FeedPresenter.swift in Sources */,
@@ -918,7 +911,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B78F90832D3FCB0A009C91B7 /* FeedImageDataLoader.swift in Sources */,
 				B7419BFE2D49004600A867B4 /* FeedPresenterAdapter.swift in Sources */,
 				B7CE2B6C2D39536D001E24CD /* FeedViewController.swift in Sources */,
 				B78CCA542D43E29D00044788 /* UITableView+Dequeueing.swift in Sources */,
