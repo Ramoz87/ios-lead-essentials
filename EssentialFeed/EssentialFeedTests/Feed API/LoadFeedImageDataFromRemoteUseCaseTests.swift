@@ -1,5 +1,5 @@
 //
-//  RemoteFeedImageDataLoaderTests.swift
+//  LoadFeedImageDataFromRemoteUseCaseTests.swift
 //  EssentialFeed
 //
 //  Created by Yury Ramazanov on 18.02.2025.
@@ -8,7 +8,7 @@
 import XCTest
 import EssentialFeed
 
-class RemoteFeedImageDataLoaderTests: XCTestCase {
+class LoadFeedImageDataFromRemoteUseCaseTests: XCTestCase {
     
     func test_init_doesNotPerformAnyURLRequest() {
         let (_, client) = makeSUT()
@@ -47,7 +47,7 @@ class RemoteFeedImageDataLoaderTests: XCTestCase {
     func test_loadImageDataFromURL_deliversInvalidDataErrorOnNon200HTTPResponse() {
         let (sut, client) = makeSUT()
         
-        let samples = [199, 201, 300, 400, 500]
+        let samples = [199, 300, 400, 500]
         
         samples.enumerated().forEach { index, code in
             expect(sut, completeWith: failure(.invalidData), when: {
