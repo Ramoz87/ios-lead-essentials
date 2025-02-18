@@ -153,8 +153,8 @@ final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
             return requestCompletionHandlers.map(\.url)
         }
         
-        func get(from url: URL, completeion: @escaping (HTTPClient.Result) -> Void) {
-            requestCompletionHandlers.append((url, completeion))
+        func get(from url: URL, completion: @escaping (HTTPClient.Result) -> Void) {
+            requestCompletionHandlers.append((url, completion))
         }
         
         func complete(with error: Error, at index: Int = 0) {
