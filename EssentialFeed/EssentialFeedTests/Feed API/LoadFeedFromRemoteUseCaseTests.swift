@@ -12,14 +12,14 @@ final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
 
     func test_init_shouldNotRequestDataFromUrl() {
         let (_, client) = makeSut()
-        XCTAssertTrue(client.requestedUrls.isEmpty)
+        XCTAssertTrue(client.requestedURLs.isEmpty)
     }
     
     func test_load_shouldRequestDataFromUrl() {
         let url = URL(string: "https://remote-feed-test-url.com")!
         let (sut, client) = makeSut(url: url)
         sut.load {_ in }
-        XCTAssertEqual(client.requestedUrls, [url])
+        XCTAssertEqual(client.requestedURLs, [url])
     }
     
     func test_load_twice_shouldRequestDataFromUrlTwice() {
@@ -27,7 +27,7 @@ final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
         let (sut, client) = makeSut(url: url)
         sut.load {_ in }
         sut.load {_ in }
-        XCTAssertEqual(client.requestedUrls, [url, url])
+        XCTAssertEqual(client.requestedURLs, [url, url])
     }
     
     func test_load_withConnectionError_shouldDeliverConnectionError() {
@@ -43,7 +43,7 @@ final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
         let codes = [199, 300, 400, 500]
         codes.enumerated().forEach { index, code in
             expect(sut, completeWith: failure(.invalidResponse)) {
-                client.complete(withCode: 200, data: Data(), at: index)
+                client.complete(with: 200, data: Data(), at: index)
             }
         }
     }
@@ -51,7 +51,7 @@ final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
     func test_load_with200HTTPCodeAndInvalidJSON_shouldDeliverInvalidResponseError() {
         let (sut, client) = makeSut()
         expect(sut, completeWith: failure(.invalidResponse)) {
-            client.complete(withCode: 200, data: Data())
+            client.complete(with: 200, data: Data())
         }
     }
     
@@ -59,7 +59,7 @@ final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
         let (sut, client) = makeSut()
         let items = [FeedImage]()
         expect(sut, completeWith: .success(items)) {
-            client.complete(withCode: 200, data: makeJSON(items))
+            client.complete(with: 200, data: makeJSON(items))
         }
     }
     
@@ -75,7 +75,7 @@ final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
         
         let items = [item1, item2]
         expect(sut, completeWith: .success(items)) {
-            client.complete(withCode: 200,
+            client.complete(with: 200,
                             data: makeJSON(items))
         }
     }
@@ -88,7 +88,7 @@ final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
         var capturedResults = [RemoteFeedLoader.Result]()
         sut?.load { capturedResults.append($0) }
         sut = nil
-        client.complete(withCode: 200, data: makeJSON([]))
+        client.complete(with: 200, data: makeJSON([]))
         
         XCTAssertTrue(capturedResults.isEmpty)
     }
@@ -144,37 +144,5 @@ final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
     
     private func failure(_ error: RemoteFeedLoader.Error) -> RemoteFeedLoader.Result {
         return .failure(error)
-    }
-    
-    private class HTTPClientSpy: HTTPClient {
-        
-        private struct Task: HTTPClientTask {
-            func cancel() {}
-        }
-        
-        var requestCompletionHandlers = [(url: URL, completion: (HTTPClient.Result) -> Void)]()
-        
-        var requestedUrls: [URL] {
-            return requestCompletionHandlers.map(\.url)
-        }
-        
-        func get(from url: URL, completion: @escaping (HTTPClient.Result) -> Void) -> HTTPClientTask {
-            requestCompletionHandlers.append((url, completion))
-            return Task()
-        }
-        
-        func complete(with error: Error, at index: Int = 0) {
-            requestCompletionHandlers[index].completion(.failure(error))
-        }
-        
-        func complete(withCode code: Int, data: Data, at index: Int = 0) {
-            let response = HTTPURLResponse(
-                url: requestedUrls[index],
-                statusCode: code,
-                httpVersion: nil,
-                headerFields: nil
-            )!
-            requestCompletionHandlers[index].completion(.success((data, response)))
-        }
     }
 }
