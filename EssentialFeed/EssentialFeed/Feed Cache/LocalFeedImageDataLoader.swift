@@ -8,6 +8,8 @@ import Foundation
 
 final public class LocalFeedImageDataLoader: FeedImageDataLoader {
 
+    public typealias SaveResult = Result<Void, Swift.Error>
+    
     private final class Task: FeedImageDataLoaderTask {
         private var completion: ((FeedImageDataLoader.Result) -> Void)?
                 
@@ -44,5 +46,9 @@ final public class LocalFeedImageDataLoader: FeedImageDataLoader {
                 .flatMap { data in data.map { .success($0) } ?? .failure(Error.notFound) })
         }
         return task
+    }
+    
+    public func save(_ data: Data, for url: URL, completion: @escaping (SaveResult) -> Void) {
+        store.insert(data, for: url) { _ in }
     }
 }
