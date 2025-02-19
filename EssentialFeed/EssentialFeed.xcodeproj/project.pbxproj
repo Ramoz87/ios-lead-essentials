@@ -625,8 +625,8 @@
 				B760A36F2D1EBE3F00A4B052 /* FeedCachePolicy.swift */,
 				B753953C2D1AD89500DE8A69 /* LocalFeedImage.swift */,
 				B7DD8B112D19B3D600E76A95 /* LocalFeedLoader.swift */,
-				B7C3462C2D65F493004A2763 /* LocalFeedImageDataLoader.swift */,
 				B7DD8B0F2D19B3B300E76A95 /* FeedStore.swift */,
+				B7C3462C2D65F493004A2763 /* LocalFeedImageDataLoader.swift */,
 				B7C3462A2D65F467004A2763 /* FeedImageDataStore.swift */,
 			);
 			path = "Feed Cache";
