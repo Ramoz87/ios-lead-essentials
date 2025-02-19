@@ -19,7 +19,7 @@ final class URLSessionHTTPClientTests: XCTestCase {
         let url = anyURL()
         let exp = expectation(description: "Wait for request")
         
-        URLProtocolStub.onProcessRequest { request in
+        URLProtocolStub.observeRequests { request in
             XCTAssertEqual(request.url, url)
             exp.fulfill()
         }
@@ -72,7 +72,9 @@ final class URLSessionHTTPClientTests: XCTestCase {
     }
     
     func test_cancelGetFromURLTask_cancelsURLRequest() {
-        let receivedError = resultErrorFor(taskHandler: { $0.cancel() }) as NSError?
+        var task: HTTPClientTask?
+        URLProtocolStub.onStartLoading { task?.cancel() }
+        let receivedError = resultErrorFor(taskHandler: { task = $0 }) as NSError?
         XCTAssertEqual(receivedError?.code, URLError.cancelled.rawValue)
     }
     
