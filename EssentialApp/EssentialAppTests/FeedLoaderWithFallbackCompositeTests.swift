@@ -49,7 +49,7 @@ final class FeedLoaderWithFallbackCompositeTests: XCTestCase {
         sut.load { receivedResult in
             switch (receivedResult, expectedResult) {
             case let (.success(receivedFeed), .success(expectedResult)):
-                XCTAssertEqual(receivedFeed, expectedResult)
+                XCTAssertEqual(receivedFeed, expectedResult, file: file, line: line)
                 
             case (.failure, .failure): break
                 
