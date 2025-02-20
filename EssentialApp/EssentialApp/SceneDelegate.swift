@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CoreData
 import EssentialFeed
 import EssentialFeediOS
 
@@ -19,13 +20,26 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let _ = (scene as? UIWindowScene) else { return }
         
-        let url = URL(string: "https://ile-api.essentialdeveloper.com/essential-feed/v1/feed")!
-        let session = URLSession(configuration: .ephemeral)
-        let client = URLSessionHTTPClient(session: session)
-        let feedLoader = RemoteFeedLoader(client: client, url: url)
-        let imageLoader = RemoteFeedImageDataLoader(client: client)
-        let feedViewController = FeedUIComposer.feedViewController(feedLoader: feedLoader,
-                                                                   imageLoader: imageLoader)
+        let remoteUrl = URL(string: "https://ile-api.essentialdeveloper.com/essential-feed/v1/feed")!
+
+        let remoteClient = URLSessionHTTPClient(session: URLSession(configuration: .ephemeral))
+        let remoteFeedLoader = RemoteFeedLoader(client: remoteClient, url: remoteUrl)
+        let remoteImageLoader = RemoteFeedImageDataLoader(client: remoteClient)
+        
+        let localUrl = NSPersistentContainer.defaultDirectoryURL().appendingPathComponent("feed-store.sqlite")
+        
+        let localStore = try! CoreDataFeedStore(storeUrl: localUrl)
+        let localFeedLoader = LocalFeedLoader(store: localStore, date: Date.init)
+        let localImageLoader = LocalFeedImageDataLoader(store: localStore)
+        
+        let feedViewController = FeedUIComposer.feedViewController(
+            feedLoader: FeedLoaderWithFallbackComposite(
+                primary: remoteFeedLoader,
+                fallback: localFeedLoader),
+            imageLoader: FeedImageDataLoaderWithFallbackComposite(
+                primary: localImageLoader,
+                fallback: remoteImageLoader))
+        
         window?.rootViewController = feedViewController
     }
 
