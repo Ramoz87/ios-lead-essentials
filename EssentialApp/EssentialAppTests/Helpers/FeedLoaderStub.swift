@@ -6,7 +6,7 @@
 //
 import EssentialFeed
 
-class LoaderStub: FeedLoader {
+final class FeedLoaderStub: FeedLoader {
     private let result: FeedLoader.Result
     
     init(result: FeedLoader.Result) {
