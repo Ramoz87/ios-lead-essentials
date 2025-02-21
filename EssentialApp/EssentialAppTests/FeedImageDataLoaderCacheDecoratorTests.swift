@@ -89,6 +89,17 @@ final class FeedImageDataLoaderCacheDecoratorTests: XCTestCase, FeedImageDataLoa
         XCTAssertEqual(cache.messages, [.save(data: data, url: url)], "Expected to cache loaded image data on success")
     }
     
+    func test_loadImageData_doesNotCacheDataOnLoaderFailure() {
+        let url = anyURL()
+        let cache = CacheSpy()
+        let (sut, loader) = makeSUT(cache: cache)
+        
+        _ = sut.loadImageData(from: url) { _ in }
+        loader.complete(with: anyNSError())
+        
+        XCTAssertTrue(cache.messages.isEmpty, "Expected not to cache image data on load error")
+    }
+    
     // MARK: - Private
     
     private func makeSUT(cache: FeedImageDataCache = CacheSpy(), file: StaticString = #file, line: UInt = #line) -> (sut: FeedImageDataLoader, loader: FeedImageDataLoaderSpy) {
