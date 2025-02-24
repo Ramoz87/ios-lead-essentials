@@ -92,6 +92,9 @@ Location</string>
                                                     <subviews>
                                                         <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="StB-O6-6fs">
                                                             <rect key="frame" x="0.0" y="0.0" width="353" height="353"/>
+                                                            <accessibility key="accessibilityConfiguration" identifier="feed-image-view">
+                                                                <bool key="isElement" value="YES"/>
+                                                            </accessibility>
                                                         </imageView>
                                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kUl-eE-1ZR">
                                                             <rect key="frame" x="0.0" y="0.0" width="353" height="353"/>
@@ -144,6 +147,9 @@ Location</string>
                                         <constraint firstItem="lua-xi-M22" firstAttribute="top" secondItem="ZdM-BJ-dIy" secondAttribute="topMargin" priority="999" constant="6" id="n3l-0g-mkX"/>
                                     </constraints>
                                 </tableViewCellContentView>
+                                <accessibility key="accessibilityConfiguration" identifier="feed-image-cell">
+                                    <bool key="isElement" value="YES"/>
+                                </accessibility>
                                 <connections>
                                     <outlet property="descriptionLabel" destination="zaA-Be-FGo" id="7fF-NC-Nr6"/>
                                     <outlet property="feedImageContainer" destination="7JM-kd-fFd" id="4OO-Fi-Jkg"/>
