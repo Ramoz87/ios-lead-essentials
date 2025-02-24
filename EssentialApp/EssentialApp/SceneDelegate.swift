@@ -13,7 +13,8 @@ import EssentialFeediOS
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
-
+    let localUrl = NSPersistentContainer.defaultDirectoryURL().appendingPathComponent("feed-store.sqlite")
+    
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
@@ -25,13 +26,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let remoteClient = makeRemoteClient()
         let remoteFeedLoader = RemoteFeedLoader(client: remoteClient, url: remoteUrl)
         let remoteImageLoader = RemoteFeedImageDataLoader(client: remoteClient)
-        
-        let localUrl = NSPersistentContainer.defaultDirectoryURL().appendingPathComponent("feed-store.sqlite")
-        
-        if CommandLine.arguments.contains("-reset") {
-            try? FileManager.default.removeItem(at: localUrl)
-        }
-        
+                
         let localStore = try! CoreDataFeedStore(storeUrl: localUrl)
         let localFeedLoader = LocalFeedLoader(store: localStore, date: Date.init)
         let localImageLoader = LocalFeedImageDataLoader(store: localStore)
@@ -81,24 +76,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 
     func makeRemoteClient() -> HTTPClient {
-        switch UserDefaults.standard.string(forKey: "connectivity") {
-        case "offline":
-            return AlwaysFailingHTTPClient()
-            
-        default:
-            return URLSessionHTTPClient(session: URLSession(configuration: .ephemeral))
-        }
+        return URLSessionHTTPClient(session: URLSession(configuration: .ephemeral))
     }
 }
 
 
-private class AlwaysFailingHTTPClient: HTTPClient {
-    private class Task: HTTPClientTask {
-        func cancel() {}
-    }
-    
-    func get(from url: URL, completion: @escaping (HTTPClient.Result) -> Void) -> HTTPClientTask {
-        completion(.failure(NSError(domain: "offline", code: 0)))
-        return Task()
-    }
-}
