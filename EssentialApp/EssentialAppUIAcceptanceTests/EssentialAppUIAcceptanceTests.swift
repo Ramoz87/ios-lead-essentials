@@ -23,11 +23,12 @@ final class EssentialAppUIAcceptanceTests: XCTestCase {
     }
 
     @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
+    func test_onLaunch_displaysRemoteFeedWhenCustomerHasConnectivity() {
         let app = XCUIApplication()
+        
         app.launch()
-
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+        
+        XCTAssertEqual(app.cells.count, 22)
+        XCTAssertEqual(app.cells.firstMatch.images.count, 1)
     }
 }
