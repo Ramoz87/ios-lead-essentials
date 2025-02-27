@@ -13,37 +13,34 @@ import EssentialFeediOS
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
-    let localUrl = NSPersistentContainer.defaultDirectoryURL().appendingPathComponent("feed-store.sqlite")
     
+    private lazy var client: HTTPClient = {
+        URLSessionHTTPClient(session: URLSession(configuration: .ephemeral))
+    }()
+    
+    private lazy var store: FeedStore & FeedImageDataStore = {
+        try! CoreDataFeedStore(
+            storeUrl: NSPersistentContainer
+                .defaultDirectoryURL()
+                .appendingPathComponent("feed-store.sqlite"))
+    }()
+    
+    private lazy var localFeedLoader: LocalFeedLoader = {
+        LocalFeedLoader(store: store, date: Date.init)
+    }()
+
+    convenience init(httpClient: HTTPClient, store: FeedStore & FeedImageDataStore) {
+        self.init()
+        self.client = httpClient
+        self.store = store
+    }
+   
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let _ = (scene as? UIWindowScene) else { return }
-        
-        let remoteUrl = URL(string: "https://static1.squarespace.com/static/5891c5b8d1758ec68ef5dbc2/t/5db4155a4fbade21d17ecd28/1572083034355/essential_app_feed.json")!
-        
-        let remoteClient = makeRemoteClient()
-        let remoteFeedLoader = RemoteFeedLoader(client: remoteClient, url: remoteUrl)
-        let remoteImageLoader = RemoteFeedImageDataLoader(client: remoteClient)
-                
-        let localStore = try! CoreDataFeedStore(storeUrl: localUrl)
-        let localFeedLoader = LocalFeedLoader(store: localStore, date: Date.init)
-        let localImageLoader = LocalFeedImageDataLoader(store: localStore)
-        
-        let feedViewController = FeedUIComposer.feedViewController(
-            feedLoader: FeedLoaderWithFallbackComposite(
-                primary: FeedLoaderCacheDecorator(
-                    decoratee: remoteFeedLoader,
-                    cache: localFeedLoader),
-                fallback: localFeedLoader),
-            imageLoader: FeedImageDataLoaderWithFallbackComposite(
-                primary: localImageLoader,
-                fallback: FeedImageDataLoaderCacheDecorator(
-                    decoratee: remoteImageLoader,
-                    cache: localImageLoader)))
-        
-        window?.rootViewController = feedViewController
+        configureWindow()
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
@@ -61,6 +58,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneWillResignActive(_ scene: UIScene) {
         // Called when the scene will move from an active state to an inactive state.
         // This may occur due to temporary interruptions (ex. an incoming phone call).
+        localFeedLoader.validateCache { _ in }
     }
 
     func sceneWillEnterForeground(_ scene: UIScene) {
@@ -73,10 +71,28 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
     }
-
-
-    func makeRemoteClient() -> HTTPClient {
-        return URLSessionHTTPClient(session: URLSession(configuration: .ephemeral))
+    
+    func configureWindow() {
+        let remoteUrl = URL(string: "https://static1.squarespace.com/static/5891c5b8d1758ec68ef5dbc2/t/5db4155a4fbade21d17ecd28/1572083034355/essential_app_feed.json")!
+        
+        let remoteFeedLoader = RemoteFeedLoader(client: client, url: remoteUrl)
+        let remoteImageLoader = RemoteFeedImageDataLoader(client: client)
+                
+        let localImageLoader = LocalFeedImageDataLoader(store: store)
+        
+        let feedViewController = FeedUIComposer.feedViewController(
+            feedLoader: FeedLoaderWithFallbackComposite(
+                primary: FeedLoaderCacheDecorator(
+                    decoratee: remoteFeedLoader,
+                    cache: localFeedLoader),
+                fallback: localFeedLoader),
+            imageLoader: FeedImageDataLoaderWithFallbackComposite(
+                primary: localImageLoader,
+                fallback: FeedImageDataLoaderCacheDecorator(
+                    decoratee: remoteImageLoader,
+                    cache: localImageLoader)))
+        
+        window?.rootViewController = UINavigationController(rootViewController: feedViewController)
     }
 }
 
