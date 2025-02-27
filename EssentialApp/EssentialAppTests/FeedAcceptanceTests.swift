@@ -1,0 +1,136 @@
+//
+//  FeedAcceptanceTests.swift
+//  EssentialApp
+//
+//  Created by Yury Ramazanov on 27.02.2025.
+//
+import XCTest
+import EssentialFeed
+import EssentialFeediOS
+@testable import EssentialApp
+
+final class FeedAcceptanceTests: XCTestCase {
+    
+    func test_onLaunch_displaysRemoteFeedWhenCustomerHasConnectivity() {
+        
+        let feed = launch(httpClient: .online(successResult), store: .empty)
+    
+        XCTAssertEqual(feed.numberOfRenderedFeedImageViews(), 2)
+        XCTAssertEqual(feed.renderedFeedImageData(at: 0), makeImageData())
+        XCTAssertEqual(feed.renderedFeedImageData(at: 1), makeImageData())
+    }
+    
+    func test_onLaunch_displaysCachedRemoteFeedWhenCustomerHasNoConnectivity() {
+        
+    }
+    
+    func test_onLaunch_displaysEmptyFeedWhenCustomerHasNoConnectivityAndNoCache() {
+        
+    }
+    
+    //MARK: - Private
+    
+    private func launch(
+        httpClient: HTTPClientStub = .offline,
+        store: InMemoryFeedStore = .empty
+    ) -> FeedViewController {
+        let sut = SceneDelegate(httpClient: httpClient, store: store)
+        sut.window = UIWindow()
+        sut.configureWindow()
+        
+        let nav = sut.window?.rootViewController as? UINavigationController
+        let ctrl = nav?.topViewController as! FeedViewController
+        ctrl.simulateAppearance()
+        
+        return ctrl
+    }
+    
+    private let imageUrl = "http://image.com"
+    
+    private func data(for url: URL) -> Data {
+        switch url.absoluteString {
+        case imageUrl: makeImageData()
+        default: makeFeedData()
+        }
+    }
+    
+    private func makeFeedData() -> Data {
+        return try! JSONSerialization.data(withJSONObject: ["items": [
+            ["id": UUID().uuidString, "image": imageUrl],
+            ["id": UUID().uuidString, "image": imageUrl]
+        ]])
+    }
+    
+    private func makeImageData() -> Data {
+        return UIImage.make(withColor: .red).pngData()!
+    }
+        
+    private func successResult(for url: URL) -> HTTPClient.Result {
+        let response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!
+        let data = data(for: url)
+        return .success((data, response))
+    }
+}
+
+private class HTTPClientStub: HTTPClient {
+    private class Task: HTTPClientTask {
+        func cancel() {}
+    }
+    
+    private let stub: (URL) -> HTTPClient.Result
+    
+    init(stub: @escaping (URL) -> HTTPClient.Result) {
+        self.stub = stub
+    }
+    
+    static var offline: HTTPClientStub {
+        HTTPClientStub(stub: { _ in .failure(NSError(domain: "offline", code: 0)) })
+    }
+    
+    static func online(_ stub: @escaping (URL) -> HTTPClient.Result) -> HTTPClientStub {
+        HTTPClientStub { stub($0) }
+    }
+    
+    //MARK: - HTTPClient
+    
+    func get(from url: URL, completion: @escaping (HTTPClient.Result) -> Void) -> HTTPClientTask {
+        completion(stub(url))
+        return Task()
+    }
+}
+
+private class InMemoryFeedStore: FeedStore, FeedImageDataStore {
+    private var feedCache: CachedFeed?
+    private var feedImageDataCache: [URL: Data] = [:]
+    
+    static var empty: InMemoryFeedStore {
+        InMemoryFeedStore()
+    }
+    
+    //MARK: - FeedStore
+    
+    func deleteCachedFeed(completion: @escaping FeedStore.DeleteCompletion) {
+        feedCache = nil
+        completion(.success(()))
+    }
+    
+    func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping FeedStore.InsertCompletion) {
+        feedCache = CachedFeed(feed: feed, timestamp: timestamp)
+        completion(.success(()))
+    }
+    
+    func retrieve(completion: @escaping FeedStore.RetrieveCompletion) {
+        completion(.success(feedCache))
+    }
+    
+    //MARK: - FeedImageDataStore
+    
+    func insert(_ data: Data, for url: URL, completion: @escaping (FeedImageDataStore.InsertResult) -> Void) {
+        feedImageDataCache[url] = data
+        completion(.success(()))
+    }
+    
+    func retrieve(dataForURL url: URL, completion: @escaping (FeedImageDataStore.RetrieveResult) -> Void) {
+        completion(.success(feedImageDataCache[url]))
+    }
+}
