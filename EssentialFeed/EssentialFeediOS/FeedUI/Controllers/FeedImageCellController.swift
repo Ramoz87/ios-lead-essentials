@@ -8,7 +8,7 @@
 import UIKit
 import EssentialFeed
 
-protocol FeedImageCellControllerDelegate {
+public protocol FeedImageCellControllerDelegate {
     func didRequestImage()
     func didCancelImageRequest()
 }
@@ -18,11 +18,11 @@ public class FeedImageCellController: FeedImageView {
     private var cell: FeedImageCell?
     private let delegate: FeedImageCellControllerDelegate
     
-    init(delegate: FeedImageCellControllerDelegate) {
+    public init(delegate: FeedImageCellControllerDelegate) {
         self.delegate = delegate
     }
     
-    func view(for tableView:UITableView) -> UITableViewCell {
+    func view(for tableView: UITableView) -> UITableViewCell {
         cell = tableView.dequeueReusableCell()
         delegate.didRequestImage()
         return cell!
