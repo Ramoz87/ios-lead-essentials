@@ -38,6 +38,21 @@ final class FeedAcceptanceTests: XCTestCase {
         XCTAssertEqual(feed.numberOfRenderedFeedImageViews(), 0)
     }
     
+    func test_onEnteringBackground_deletesExpiredFeedCache() {
+        let store = InMemoryFeedStore.withExpiredFeedCache
+        
+        enterBackground(store: store)
+        
+        XCTAssertNil(store.feedCache, "Expected to delete expired cache")
+    }
+    
+    func test_onEnteringBackground_keepsNonExpiredFeedCache() {
+        let store = InMemoryFeedStore.withNonExpiredFeedCache
+        
+        enterBackground(store: store)
+        
+        XCTAssertNotNil(store.feedCache, "Expected to keep non-expired cache")
+    }
     //MARK: - Private
     
     private func launch(
@@ -53,6 +68,12 @@ final class FeedAcceptanceTests: XCTestCase {
         ctrl.simulateAppearance()
         
         return ctrl
+    }
+    
+    private func enterBackground(httpClient: HTTPClientStub = .offline, store: InMemoryFeedStore) {
+        let sut = SceneDelegate(httpClient: httpClient, store: store)
+        let scene = UIApplication.shared.connectedScenes.first!
+        sut.sceneWillResignActive(scene)
     }
     
     private let imageUrl = "http://image.com"
@@ -110,11 +131,23 @@ private class HTTPClientStub: HTTPClient {
 }
 
 private class InMemoryFeedStore: FeedStore, FeedImageDataStore {
-    private var feedCache: CachedFeed?
+    private(set) var feedCache: CachedFeed?
     private var feedImageDataCache: [URL: Data] = [:]
+    
+    private init(feedCache: CachedFeed? = nil) {
+        self.feedCache = feedCache
+    }
     
     static var empty: InMemoryFeedStore {
         InMemoryFeedStore()
+    }
+    
+    static var withExpiredFeedCache: InMemoryFeedStore {
+        InMemoryFeedStore(feedCache: CachedFeed(feed: [], timestamp: Date.distantPast))
+    }
+    
+    static var withNonExpiredFeedCache: InMemoryFeedStore {
+        InMemoryFeedStore(feedCache: CachedFeed(feed: [], timestamp: Date()))
     }
     
     //MARK: - FeedStore
