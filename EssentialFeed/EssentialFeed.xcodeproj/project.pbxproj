@@ -40,6 +40,12 @@
 		B78449142D0EE31300E75BFF /* EssentialFeed.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 080EDEF121B6DA7E00813479 /* EssentialFeed.framework */; };
 		B784491A2D0EE32F00E75BFF /* XCTestCase+MemoryLeaks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7C2A9422D0C72A4002F8A78 /* XCTestCase+MemoryLeaks.swift */; };
 		B784491D2D0EE52600E75BFF /* EssentialFeedAPIEndToEndTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B784491B2D0EE52600E75BFF /* EssentialFeedAPIEndToEndTests.swift */; };
+		B78A29A62D71DE36004A69A8 /* FeedSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B78A29A52D71DB71004A69A8 /* FeedSnapshotTests.swift */; };
+		B78A29A92D71DF94004A69A8 /* UIImage+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B78A29A82D71DF94004A69A8 /* UIImage+Helpers.swift */; };
+		B78A29AD2D71E4C6004A69A8 /* UITableView+HeaderSizing.swift in Sources */ = {isa = PBXBuildFile; fileRef = B78A29AC2D71E4C2004A69A8 /* UITableView+HeaderSizing.swift */; };
+		B78A29AF2D71F760004A69A8 /* UIViewController+Snapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = B78A29AE2D71F758004A69A8 /* UIViewController+Snapshot.swift */; };
+		B78A29B12D71F814004A69A8 /* XCTestCase+Snapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = B78A29B02D71F80A004A69A8 /* XCTestCase+Snapshot.swift */; };
+		B78A29B32D71F83B004A69A8 /* ImageStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = B78A29B22D71F83B004A69A8 /* ImageStub.swift */; };
 		B78CCA542D43E29D00044788 /* UITableView+Dequeueing.swift in Sources */ = {isa = PBXBuildFile; fileRef = B78CCA532D43E28900044788 /* UITableView+Dequeueing.swift */; };
 		B78CCA562D43E30400044788 /* UIImageView+Animations.swift in Sources */ = {isa = PBXBuildFile; fileRef = B78CCA552D43E2FC00044788 /* UIImageView+Animations.swift */; };
 		B78F90872D3FDD10009C91B7 /* FeedImageCellController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B78F90862D3FDD0F009C91B7 /* FeedImageCellController.swift */; };
@@ -185,6 +191,12 @@
 		B77FBEF42D0718E3006992A3 /* RemoteFeedLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteFeedLoader.swift; sourceTree = "<group>"; };
 		B78449102D0EE31300E75BFF /* EssentialFeedAPIEndToEndTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EssentialFeedAPIEndToEndTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B784491B2D0EE52600E75BFF /* EssentialFeedAPIEndToEndTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EssentialFeedAPIEndToEndTests.swift; sourceTree = "<group>"; };
+		B78A29A52D71DB71004A69A8 /* FeedSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedSnapshotTests.swift; sourceTree = "<group>"; };
+		B78A29A82D71DF94004A69A8 /* UIImage+Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+Helpers.swift"; sourceTree = "<group>"; };
+		B78A29AC2D71E4C2004A69A8 /* UITableView+HeaderSizing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITableView+HeaderSizing.swift"; sourceTree = "<group>"; };
+		B78A29AE2D71F758004A69A8 /* UIViewController+Snapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Snapshot.swift"; sourceTree = "<group>"; };
+		B78A29B02D71F80A004A69A8 /* XCTestCase+Snapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCTestCase+Snapshot.swift"; sourceTree = "<group>"; };
+		B78A29B22D71F83B004A69A8 /* ImageStub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageStub.swift; sourceTree = "<group>"; };
 		B78CCA532D43E28900044788 /* UITableView+Dequeueing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITableView+Dequeueing.swift"; sourceTree = "<group>"; };
 		B78CCA552D43E2FC00044788 /* UIImageView+Animations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImageView+Animations.swift"; sourceTree = "<group>"; };
 		B78F90822D3FCB04009C91B7 /* FeedImageDataLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedImageDataLoader.swift; sourceTree = "<group>"; };
@@ -361,6 +373,8 @@
 		B70337712D37FC25005D8200 /* EssentialFeediOSTests */ = {
 			isa = PBXGroup;
 			children = (
+				B78A29A72D71DF8D004A69A8 /* Helpers */,
+				B78A29A52D71DB71004A69A8 /* FeedSnapshotTests.swift */,
 			);
 			path = EssentialFeediOSTests;
 			sourceTree = "<group>";
@@ -383,6 +397,7 @@
 				B7314E5F2D52743D000DE54C /* UIRefreshControl+Helpers.swift */,
 				B78CCA552D43E2FC00044788 /* UIImageView+Animations.swift */,
 				B78CCA532D43E28900044788 /* UITableView+Dequeueing.swift */,
+				B78A29AC2D71E4C2004A69A8 /* UITableView+HeaderSizing.swift */,
 				B7F5FFA52D3E96D800734A23 /* UIView+Shimmering.swift */,
 			);
 			path = Helpers;
@@ -449,6 +464,17 @@
 				B784491B2D0EE52600E75BFF /* EssentialFeedAPIEndToEndTests.swift */,
 			);
 			path = EssentialFeedAPIEndToEndTests;
+			sourceTree = "<group>";
+		};
+		B78A29A72D71DF8D004A69A8 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				B78A29B22D71F83B004A69A8 /* ImageStub.swift */,
+				B78A29A82D71DF94004A69A8 /* UIImage+Helpers.swift */,
+				B78A29AE2D71F758004A69A8 /* UIViewController+Snapshot.swift */,
+				B78A29B02D71F80A004A69A8 /* XCTestCase+Snapshot.swift */,
+			);
+			path = Helpers;
 			sourceTree = "<group>";
 		};
 		B78F90742D3FC6E8009C91B7 /* Controllers */ = {
@@ -925,6 +951,7 @@
 				B7F5FF902D3E8CF400734A23 /* FeedImageCell.swift in Sources */,
 				B78CCA562D43E30400044788 /* UIImageView+Animations.swift in Sources */,
 				B7F5FFA62D3E96DD00734A23 /* UIView+Shimmering.swift in Sources */,
+				B78A29AD2D71E4C6004A69A8 /* UITableView+HeaderSizing.swift in Sources */,
 				B7314E602D527446000DE54C /* UIRefreshControl+Helpers.swift in Sources */,
 				B7314E5B2D52713B000DE54C /* ErrorView.swift in Sources */,
 				B78F90872D3FDD10009C91B7 /* FeedImageCellController.swift in Sources */,
@@ -936,7 +963,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				B7EF34302D64D432005A574C /* HTTPClientSpy.swift in Sources */,
+				B78A29B12D71F814004A69A8 /* XCTestCase+Snapshot.swift in Sources */,
+				B78A29A62D71DE36004A69A8 /* FeedSnapshotTests.swift in Sources */,
+				B78A29B32D71F83B004A69A8 /* ImageStub.swift in Sources */,
 				B7CE2B562D393D8A001E24CD /* XCTestCase+MemoryLeaks.swift in Sources */,
+				B78A29A92D71DF94004A69A8 /* UIImage+Helpers.swift in Sources */,
+				B78A29AF2D71F760004A69A8 /* UIViewController+Snapshot.swift in Sources */,
 				B7F5FF8E2D3E8B4C00734A23 /* SharedHelpers.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

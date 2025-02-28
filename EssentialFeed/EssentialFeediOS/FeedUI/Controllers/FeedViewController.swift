@@ -23,6 +23,11 @@ public class FeedViewController: UITableViewController, UITableViewDataSourcePre
             tableView.reloadData()
         }
     }
+    
+    public override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        tableView.sizeTableHeaderToFit()
+    }
         
     public override func viewDidLoad() {
         onViewIsAppearing = { [weak self] in
