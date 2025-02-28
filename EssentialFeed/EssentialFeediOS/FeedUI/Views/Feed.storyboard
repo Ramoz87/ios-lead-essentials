@@ -19,7 +19,7 @@
                             <rect key="frame" x="0.0" y="0.0" width="393" height="62"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <subviews>
-                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xDA-Sz-zNR">
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xDA-Sz-zNR">
                                     <rect key="frame" x="0.0" y="0.0" width="393" height="62"/>
                                     <gestureRecognizers/>
                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
@@ -32,7 +32,11 @@
                             </subviews>
                             <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                             <constraints>
+                                <constraint firstAttribute="trailing" secondItem="xDA-Sz-zNR" secondAttribute="trailing" id="093-CG-4O9"/>
                                 <constraint firstAttribute="trailing" secondItem="xDA-Sz-zNR" secondAttribute="trailing" id="3eM-0Z-Ou2"/>
+                                <constraint firstAttribute="bottom" secondItem="xDA-Sz-zNR" secondAttribute="bottom" id="NF1-I5-gzR"/>
+                                <constraint firstItem="xDA-Sz-zNR" firstAttribute="top" secondItem="1yD-n6-pXc" secondAttribute="top" id="TWb-Af-1W5"/>
+                                <constraint firstItem="xDA-Sz-zNR" firstAttribute="leading" secondItem="1yD-n6-pXc" secondAttribute="leading" id="UpQ-a1-bZT"/>
                                 <constraint firstItem="xDA-Sz-zNR" firstAttribute="top" secondItem="1yD-n6-pXc" secondAttribute="top" id="mI8-9o-Ddz"/>
                                 <constraint firstAttribute="bottom" secondItem="xDA-Sz-zNR" secondAttribute="bottom" id="olA-at-VIw"/>
                                 <constraint firstItem="xDA-Sz-zNR" firstAttribute="leading" secondItem="1yD-n6-pXc" secondAttribute="leading" id="wie-iB-xia"/>

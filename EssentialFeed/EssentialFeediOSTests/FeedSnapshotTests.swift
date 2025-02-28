@@ -5,8 +5,9 @@
 //  Created by Yury Ramazanov on 28.02.2025.
 //
 import XCTest
-@testable import EssentialFeed
 import EssentialFeediOS
+@testable import EssentialFeed
+
 
 final class FeedSnapshotTests: XCTestCase {
     
@@ -26,6 +27,14 @@ final class FeedSnapshotTests: XCTestCase {
         record(snapshot: sut.snapshot(), named: "FEED_WITH_CONTENT")
     }
     
+    func test_feedWithErrorMessage() {
+        let sut = makeSUT()
+        
+        sut.display(FeedErrorViewModel(message: "This is a\nmulti-line\nerror message"))
+        
+        record(snapshot: sut.snapshot(), named: "FEED_WITH_ERROR_MESSAGE")
+    }
+    
     //MARK: - Private
     
     private func makeSUT() -> FeedViewController {
@@ -40,7 +49,7 @@ final class FeedSnapshotTests: XCTestCase {
         return []
     }
     
-    private func feedWithContent() -> [FeedImageCellController] {        
+    private func feedWithContent() -> [FeedImageCellController] {
         return images().map { stub in
             let cellController = FeedImageCellController(delegate: stub)
             stub.controller = cellController
