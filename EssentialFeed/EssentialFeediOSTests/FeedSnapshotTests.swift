@@ -22,7 +22,7 @@ final class FeedSnapshotTests: XCTestCase {
     func test_feedWithContent() {
         let sut = makeSUT()
         
-        sut.display(feedWithContent())
+        sut.display(images())
         
         record(snapshot: sut.snapshot(), named: "FEED_WITH_CONTENT")
     }
@@ -33,6 +33,14 @@ final class FeedSnapshotTests: XCTestCase {
         sut.display(FeedErrorViewModel(message: "This is a\nmulti-line\nerror message"))
         
         record(snapshot: sut.snapshot(), named: "FEED_WITH_ERROR_MESSAGE")
+    }
+    
+    func test_feedWithFailedImageLoading() {
+        let sut = makeSUT()
+        
+        sut.display(failedImages())
+        
+        record(snapshot: sut.snapshot(), named: "FEED_WITH_FAILED_IMAGE_LOADING")
     }
     
     //MARK: - Private
@@ -49,15 +57,6 @@ final class FeedSnapshotTests: XCTestCase {
         return []
     }
     
-    private func feedWithContent() -> [FeedImageCellController] {
-        return images().map { stub in
-            let cellController = FeedImageCellController(delegate: stub)
-            stub.controller = cellController
-            return cellController
-        }
-
-    }
-    
     private func images() -> [ImageStub] {
         return [
             ImageStub(
@@ -70,6 +69,21 @@ final class FeedSnapshotTests: XCTestCase {
                 location: "Garth Pier",
                 image: UIImage.make(withColor: .green)
             )]
+    }
+    
+    private func failedImages() -> [ImageStub] {
+        return [
+            ImageStub(
+                description: nil,
+                location: "Cannon Street, London",
+                image: nil
+            ),
+            ImageStub(
+                description: nil,
+                location: "Brighton Seafront",
+                image: nil
+            )
+        ]
     }
     
     private func record(snapshot: UIImage, named name: String, file: StaticString = #file, line: UInt = #line) {
@@ -105,7 +119,18 @@ extension UIViewController {
     }
 }
 
-private class ImageStub: FeedImageCellControllerDelegate {
+extension FeedViewController {
+    func display(_ images: [ImageStub]) {
+        let model = images.map { stub in
+            let cellController = FeedImageCellController(delegate: stub)
+            stub.controller = cellController
+            return cellController
+        }
+        display(model)
+    }
+}
+ 
+class ImageStub: FeedImageCellControllerDelegate {
     let viewModel: FeedImageViewModel<UIImage>
     weak var controller: FeedImageCellController?
 
