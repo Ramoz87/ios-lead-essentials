@@ -14,12 +14,12 @@ public final class FeedUIComposer {
     private init() {}
     
     public static func feedViewController(feedLoader: FeedLoader.Publisher, imageLoader: @escaping (URL) -> FeedImageDataLoader.Publisher) -> FeedViewController {
-        let presenterAdapter = FeedPresenterAdapter(feedLoader: feedLoader.dispatchOnMainQueue())
+        let presenterAdapter = FeedPresenterAdapter(feedLoader: feedLoader)
         let feedController = makeFeedViewController(delegate: presenterAdapter, title: FeedPresenter.title)
         presenterAdapter.presenter = FeedPresenter(
             feedView: FeedViewAdapter(
                 controller: feedController,
-                imageLoader: { imageLoader($0).dispatchOnMainQueue()}),
+                imageLoader: imageLoader),
             loadingView: WeakReference(object: feedController),
             errorView: WeakReference(object: feedController))
         
