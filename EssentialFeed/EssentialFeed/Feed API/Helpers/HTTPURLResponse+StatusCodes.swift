@@ -7,9 +7,7 @@
 import Foundation
 
 extension HTTPURLResponse {
-    private static var successCodes = Range(uncheckedBounds: (200, 300))
-
     var isOK: Bool {
-        return HTTPURLResponse.successCodes.contains(statusCode)
+        return (200...299).contains(statusCode)
     }
 }
