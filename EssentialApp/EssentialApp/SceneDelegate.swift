@@ -100,3 +100,5 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             .caching(to: localImageLoader, using: url)
     }
 }
+
+extension RemoteLoader: @retroactive FeedLoader where Success == [FeedImage] {}
