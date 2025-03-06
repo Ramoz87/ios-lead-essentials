@@ -9,34 +9,6 @@ import EssentialFeed
 
 final class LoadImageCommentsFromRemoteUseCaseTests: XCTestCase {
 
-    func test_init_shouldNotRequestDataFromUrl() {
-        let (_, client) = makeSut()
-        XCTAssertTrue(client.requestedURLs.isEmpty)
-    }
-    
-    func test_load_shouldRequestDataFromUrl() {
-        let url = URL(string: "https://remote-feed-test-url.com")!
-        let (sut, client) = makeSut(url: url)
-        sut.load {_ in }
-        XCTAssertEqual(client.requestedURLs, [url])
-    }
-    
-    func test_load_twice_shouldRequestDataFromUrlTwice() {
-        let url = URL(string: "https://remote-feed-test-url.com")!
-        let (sut, client) = makeSut(url: url)
-        sut.load {_ in }
-        sut.load {_ in }
-        XCTAssertEqual(client.requestedURLs, [url, url])
-    }
-    
-    func test_load_withConnectionError_shouldDeliverConnectionError() {
-        let (sut, client) = makeSut()
-        expect(sut, completeWith: failure(.connection)) {
-            let error = NSError(domain: "Test", code: 0)
-            client.complete(with: error)
-        }
-    }
-    
     func test_load_withNon2xxHTTPCode_shouldDeliverInvalidResponseError() {
         let (sut, client) = makeSut()
         let codes = [199, 300, 400, 500]
@@ -89,19 +61,6 @@ final class LoadImageCommentsFromRemoteUseCaseTests: XCTestCase {
                 client.complete(with: code, data:json, at: index)
             }
         }
-    }
-    
-    func test_load_deallocatedBeforeCompletion_shouldNotDeliverResult() {
-        let client = HTTPClientSpy()
-        let url = URL(string: "https://remote-feed-test-url.com")!
-        var sut: RemoteImageCommentsLoader? = RemoteImageCommentsLoader(client: client, url: url)
-    
-        var capturedResults = [RemoteImageCommentsLoader.Result]()
-        sut?.load { capturedResults.append($0) }
-        sut = nil
-        client.complete(with: 200, data: makeJSON([]))
-        
-        XCTAssertTrue(capturedResults.isEmpty)
     }
     
     //MARK: - Helpers

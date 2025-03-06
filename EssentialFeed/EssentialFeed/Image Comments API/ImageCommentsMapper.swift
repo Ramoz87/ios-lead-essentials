@@ -27,6 +27,10 @@ final class ImageCommentsMapper {
         }
     }
     
+    public enum Error: Swift.Error {
+        case invalidResponse
+    }
+    
     static func map(_ data: Data, _ response: HTTPURLResponse) throws -> [ImageComment] {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601

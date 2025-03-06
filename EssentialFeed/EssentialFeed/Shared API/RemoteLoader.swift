@@ -6,7 +6,7 @@
 //
 import Foundation
 
-public class RemoteLoader<Resource> {
+public class RemoteLoader<Success> {
     private let url: URL
     private let client: HTTPClient
     private let mapper: Mapper
@@ -16,8 +16,8 @@ public class RemoteLoader<Resource> {
         case invalidResponse
     }
     
-    public typealias Result = Swift.Result<Resource, Swift.Error>
-    public typealias Mapper = (Data, HTTPURLResponse) throws -> Resource
+    public typealias Result = Swift.Result<Success, Swift.Error>
+    public typealias Mapper = (Data, HTTPURLResponse) throws -> Success
     
     public init(client: HTTPClient, url: URL, mapper: @escaping Mapper) {
         self.url = url
