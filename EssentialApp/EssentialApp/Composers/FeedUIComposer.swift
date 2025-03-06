@@ -13,7 +13,8 @@ import EssentialFeediOS
 public final class FeedUIComposer {
     private init() {}
     
-    public static func feedViewController(feedLoader: FeedLoader.Publisher, imageLoader: @escaping (URL) -> FeedImageDataLoader.Publisher) -> FeedViewController {
+    public static func feedViewController(feedLoader: @escaping () -> AnyPublisher<[FeedImage], Error>,
+                                          imageLoader: @escaping (URL) -> FeedImageDataLoader.Publisher) -> FeedViewController {
         let presenterAdapter = FeedPresenterAdapter(feedLoader: feedLoader)
         let feedController = makeFeedViewController(delegate: presenterAdapter, title: FeedPresenter.title)
         presenterAdapter.presenter = FeedPresenter(

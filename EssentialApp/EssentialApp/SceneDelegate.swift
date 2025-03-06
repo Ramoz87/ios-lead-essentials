@@ -7,6 +7,7 @@
 
 import UIKit
 import CoreData
+import Combine
 import EssentialFeed
 import EssentialFeediOS
 
@@ -78,14 +79,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     func configureWindow() {
         let feedViewController = FeedUIComposer.feedViewController(
-            feedLoader: makeRemoteFeedLoaderWithLocalFallback(),
+            feedLoader: makeRemoteFeedLoaderWithLocalFallback,
             imageLoader: makeLocalImageLoaderWithRemoteFallback)
         
         window?.rootViewController = UINavigationController(rootViewController: feedViewController)
         window?.makeKeyAndVisible()
     }
     
-    private func makeRemoteFeedLoaderWithLocalFallback() -> FeedLoader.Publisher {
+    private func makeRemoteFeedLoaderWithLocalFallback() -> AnyPublisher<[FeedImage], Error> {
         client
             .getPublisher(url: remoteUrl)
             .tryMap(RemoteFeedLoaderDataMapper.map)

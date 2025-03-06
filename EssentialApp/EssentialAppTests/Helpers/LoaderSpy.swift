@@ -6,26 +6,29 @@
 //
 
 import Foundation
+import Combine
 import EssentialFeed
 import EssentialFeediOS
 
-class LoaderSpy: FeedLoader, FeedImageDataLoader {
+class LoaderSpy: FeedImageDataLoader {
     
-    private var completions = [(FeedLoader.Result) -> Void]()
+    private var requests = [PassthroughSubject<[FeedImage], Error>]()
     var loadCallCount: Int {
-        return completions.count
+        return requests.count
     }
     
-    func load(completion: @escaping (FeedLoader.Result) -> Void) {
-        completions.append(completion)
+    func loadPublisher() -> AnyPublisher<[FeedImage], Error> {
+        let publisher = PassthroughSubject<[FeedImage], Error>()
+        requests.append(publisher)
+        return publisher.eraseToAnyPublisher()
     }
     
     func completeFeedLoading(with feed: [FeedImage] = [], at index: Int = 0) {
-        completions[index](.success(feed))
+        requests[index].send(feed)
     }
     
     func completeFeedLoadingWithError(at index: Int = 0) {
-        completions[index](.failure(anyNSError()))
+        requests[index].send(completion: .failure(anyNSError()))
     }
     
     //MARK: - FeedImageDataLoader
