@@ -60,9 +60,9 @@ final class RemoteLoaderTests: XCTestCase {
     func test_load_deallocatedBeforeCompletion_shouldNotDeliverResult() {
         let client = HTTPClientSpy()
         let url = URL(string: "https://remote-feed-test-url.com")!
-        var sut: RemoteFeedLoader? = RemoteFeedLoader(client: client, url: url)
-    
-        var capturedResults = [RemoteFeedLoader.Result]()
+        var sut: RemoteLoader<String>? = RemoteLoader<String>(client: client, url: url, mapper: { _, _ in "any" })
+       
+        var capturedResults = [RemoteLoader<String>.Result]()
         sut?.load { capturedResults.append($0) }
         sut = nil
         client.complete(with: 200, data: makeJSON([]))

@@ -23,10 +23,14 @@ public final class RemoteFeedLoaderDataMapper {
             items.map { FeedImage(id: $0.id, description: $0.description, location: $0.location, url: $0.image) }
         }
     }
+    
+    public enum Error: Swift.Error {
+        case invalidData
+    }
 
     public static func map(_ data: Data, _ response: HTTPURLResponse) throws -> [FeedImage] {
         guard response.isOK, let result = try? JSONDecoder().decode(Result.self, from: data) else {
-            throw RemoteFeedLoader.Error.invalidResponse
+            throw Error.invalidData
         }
         
         return result.images

@@ -28,7 +28,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }()
     
     private lazy var localFeedLoader = LocalFeedLoader(store: store, date: Date.init)
-    private lazy var remoteFeedLoader = RemoteFeedLoader(client: client, url: remoteUrl)
+    private lazy var remoteFeedLoader = RemoteLoader(client: client, url: remoteUrl, mapper: RemoteFeedLoaderDataMapper.map)
     
     private lazy var localImageLoader = LocalFeedImageDataLoader(store: store)
     private lazy var remoteImageLoader = RemoteFeedImageDataLoader(client: client)
