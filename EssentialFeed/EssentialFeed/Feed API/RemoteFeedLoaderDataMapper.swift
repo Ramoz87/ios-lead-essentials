@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class RemoteFeedLoaderDataMapper {
+public final class RemoteFeedLoaderDataMapper {
     
     private struct Result: Decodable {
         private let items: [RemoteFeedItem]
@@ -24,7 +24,7 @@ final class RemoteFeedLoaderDataMapper {
         }
     }
 
-    static func map(_ data: Data, _ response: HTTPURLResponse) throws -> [FeedImage] {
+    public static func map(_ data: Data, _ response: HTTPURLResponse) throws -> [FeedImage] {
         guard response.isOK, let result = try? JSONDecoder().decode(Result.self, from: data) else {
             throw RemoteFeedLoader.Error.invalidResponse
         }
