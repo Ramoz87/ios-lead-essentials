@@ -7,18 +7,32 @@
 
 import Foundation
 
-final class RemoteFeedLoaderDataMapper {
+public final class RemoteFeedLoaderDataMapper {
     
     private struct Result: Decodable {
-        let items: [RemoteFeedItem]
-    }
-
-    static func map(_ data: Data, _ response: HTTPURLResponse) throws -> [RemoteFeedItem] {
-        guard response.isOK, let result = try? JSONDecoder().decode(Result.self, from: data) else {
-            throw RemoteFeedLoader.Error.invalidResponse
+        private let items: [RemoteFeedItem]
+        
+        private struct RemoteFeedItem: Decodable {
+            let id: UUID
+            let description: String?
+            let location: String?
+            let image: URL
         }
         
-        return result.items
+        var images: [FeedImage] {
+            items.map { FeedImage(id: $0.id, description: $0.description, location: $0.location, url: $0.image) }
+        }
+    }
+    
+    public enum Error: Swift.Error {
+        case invalidData
+    }
+
+    public static func map(_ data: Data, _ response: HTTPURLResponse) throws -> [FeedImage] {
+        guard response.isOK, let result = try? JSONDecoder().decode(Result.self, from: data) else {
+            throw Error.invalidData
+        }
+        
+        return result.images
     }
 }
-
