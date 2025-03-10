@@ -38,13 +38,13 @@ class LoadResourcePresenterTests: XCTestCase {
         ])
     }
     
-    func test_didFinishLoadingFeedWithError_displaysLocalizedErrorMessageAndStopsLoading() {
+    func test_didFinishLoadingWithError_displaysLocalizedErrorMessageAndStopsLoading() {
         let (sut, view) = makeSUT()
         
         sut.didFinishLoadingFeed(with: anyNSError())
         
         XCTAssertEqual(view.messages, [
-            .display(errorMessage: localized("FEED_VIEW_CONNECTION_ERROR")),
+            .display(errorMessage: localized("GENERIC_CONNECTION_ERROR")),
             .display(isLoading: false)
         ])
     }
@@ -65,14 +65,14 @@ class LoadResourcePresenterTests: XCTestCase {
         }
     
     func localized(_ key: String, file: StaticString = #file, line: UInt = #line) -> String {
-            let table = "Feed"
+        let table = "Shared"
         let bundle = Bundle(for: SUT.self)
-            let value = bundle.localizedString(forKey: key, value: nil, table: table)
-            if value == key {
-                XCTFail("Missing localized string for key: \(key) in table: \(table)", file: file, line: line)
-            }
-            return value
+        let value = bundle.localizedString(forKey: key, value: nil, table: table)
+        if value == key {
+            XCTFail("Missing localized string for key: \(key) in table: \(table)", file: file, line: line)
         }
+        return value
+    }
     
     private class ViewSpy: ResourceView, FeedErrorView, FeedLoadingView {
         
