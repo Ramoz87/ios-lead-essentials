@@ -16,8 +16,8 @@ struct WeakReference<T: AnyObject> {
     }
 }
 
-extension WeakReference: FeedLoadingView where T: FeedLoadingView {
-    func display(_ viewModel: FeedLoadingViewModel) {
+extension WeakReference: ResourceLoadingView where T: ResourceLoadingView {
+    func display(_ viewModel: ResourceLoadingViewModel) {
         object?.display(viewModel)
     }
 }
@@ -28,8 +28,8 @@ extension WeakReference: FeedImageView where T: FeedImageView, T.Image == UIImag
     }
 }
 
-extension WeakReference: FeedErrorView where T: FeedErrorView {
-    func display(_ viewModel: FeedErrorViewModel) {
+extension WeakReference: ResourceErrorView where T: ResourceErrorView {
+    func display(_ viewModel: ResourceErrorViewModel) {
         object?.display(viewModel)
     }
 }
