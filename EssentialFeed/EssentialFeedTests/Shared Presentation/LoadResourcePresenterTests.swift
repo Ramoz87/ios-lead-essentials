@@ -26,14 +26,14 @@ class LoadResourcePresenterTests: XCTestCase {
         ])
     }
     
-    func test_didFinishLoadingFeed_displaysFeedAndStopsLoading() {
-        let (sut, view) = makeSUT()
-        let feed = uniqueImageFeed().models
+    func test_didFinishLoading_displaysResourceAndStopsLoading() {
+        let (sut, view) = makeSUT(mapper: { $0 + " view model" })
+        let feed = "resource"
         
-        sut.didFinishLoadingFeed(with: feed)
+        sut.didFinishLoading(with: feed)
         
         XCTAssertEqual(view.messages, [
-            .display(feed: feed),
+            .display(resourceViewModel: "resource view model"),
             .display(isLoading: false)
         ])
     }
@@ -51,17 +51,22 @@ class LoadResourcePresenterTests: XCTestCase {
     
     //MARK: - Private
     
-    private func makeSUT(file: StaticString = #file, line: UInt = #line) -> (sut: LoadResourcePresenter, view: ViewSpy) {
-        let view = ViewSpy()
-        let sut = LoadResourcePresenter(feedView: view, loadingView: view, errorView: view)
-        trackMemoryLeaks(view, file: file, line: line)
-        trackMemoryLeaks(sut, file: file, line: line)
-        return (sut, view)
-    }
+    private typealias SUT = LoadResourcePresenter<String, ViewSpy>
+    
+    private func makeSUT(
+        mapper: @escaping SUT.Mapper = { _ in "any" },
+        file: StaticString = #file,
+        line: UInt = #line) -> (sut: SUT, view: ViewSpy) {
+            let view = ViewSpy()
+            let sut = SUT(resourceView: view, loadingView: view, errorView: view, mapper: mapper)
+            trackMemoryLeaks(view, file: file, line: line)
+            trackMemoryLeaks(sut, file: file, line: line)
+            return (sut, view)
+        }
     
     func localized(_ key: String, file: StaticString = #file, line: UInt = #line) -> String {
             let table = "Feed"
-        let bundle = Bundle(for: LoadResourcePresenter.self)
+        let bundle = Bundle(for: SUT.self)
             let value = bundle.localizedString(forKey: key, value: nil, table: table)
             if value == key {
                 XCTFail("Missing localized string for key: \(key) in table: \(table)", file: file, line: line)
@@ -69,18 +74,20 @@ class LoadResourcePresenterTests: XCTestCase {
             return value
         }
     
-    private class ViewSpy: FeedView, FeedErrorView, FeedLoadingView {
-       
+    private class ViewSpy: ResourceView, FeedErrorView, FeedLoadingView {
+        
+        typealias ResourceViewModel = String
+        
         enum Message: Hashable {
+            case display(resourceViewModel: ResourceViewModel)
             case display(errorMessage: String?)
             case display(isLoading: Bool)
-            case display(feed: [FeedImage])
         }
         
         private(set) var messages = Set<Message>()
         
-        func display(_ viewModel: FeedViewModel) {
-            messages.insert(.display(feed: viewModel.feed))
+        func display(_ viewModel: String) {
+            messages.insert(.display(resourceViewModel: viewModel))
         }
         
         func display(_ viewModel: FeedErrorViewModel) {
