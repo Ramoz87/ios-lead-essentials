@@ -13,7 +13,7 @@ final class FeedViewAdapter: ResourceView {
     private weak var controller: FeedViewController?
     private let imageLoader: (URL) -> FeedImageDataLoader.Publisher
     
-    private struct InvalidImageData: Error {}
+    private typealias ImageDataPresentationAdapter = LoadResourcePresenterAdapter<Data, WeakReference<FeedImageCellController>>
     
     init(controller: FeedViewController, imageLoader: @escaping (URL) -> FeedImageDataLoader.Publisher) {
         self.controller = controller
@@ -22,24 +22,31 @@ final class FeedViewAdapter: ResourceView {
     
     func display(_ viewModel: FeedViewModel) {
         let cells = viewModel.feed.map { model in
-            let adapter = LoadResourcePresenterAdapter<Data, WeakReference<FeedImageCellController>> (loader: { [imageLoader] in
+            let adapter = ImageDataPresentationAdapter(loader: { [imageLoader] in
                 imageLoader(model.url)
             })
             
-            let view = FeedImageCellController(viewModel: FeedImagePresenter<FeedImageCellController, UIImage>.map(model),
-                                               delegate: adapter)
+            let view = FeedImageCellController(
+                viewModel: FeedImagePresenter.map(model),
+                delegate: adapter)
             adapter.presenter = LoadResourcePresenter(
                 resourceView: WeakReference(object: view),
                 loadingView: WeakReference(object: view),
                 errorView: WeakReference(object: view),
-                mapper: { data in
-                    guard let image = UIImage(data: data) else {
-                        throw InvalidImageData()
-                    }
-                    return image
-                })
+                mapper: UIImage.tryMake)
             return view
         }
         controller?.display(cells)
+    }
+}
+
+extension UIImage {
+    struct InvalidImageData: Error {}
+
+    static func tryMake(data: Data) throws -> UIImage {
+        guard let image = UIImage(data: data) else {
+            throw InvalidImageData()
+        }
+        return image
     }
 }
