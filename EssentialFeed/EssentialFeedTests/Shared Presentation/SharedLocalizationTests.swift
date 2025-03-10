@@ -8,10 +8,15 @@
 import XCTest
 import EssentialFeed
 
-final class FeedLocalizationTests: XCTestCase {
+final class SharedLocalizationTests: XCTestCase {
+    
     func test_localizedStrings_haveKeysAndValuesForAllSupportedLocalizations() {
-        let table = "Feed"
-        let bundle = Bundle(for: FeedPresenter.self)
+        let table = "Shared"
+        let bundle = Bundle(for: LoadResourcePresenter<Any, DummyView>.self)
         assertLocalizedStringExist(in: bundle, table: table)
+    }
+    
+    private class DummyView: ResourceView {
+        func display(_ viewModel: Any) {}
     }
 }
