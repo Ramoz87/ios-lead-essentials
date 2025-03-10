@@ -16,15 +16,15 @@ struct WeakReference<T: AnyObject> {
     }
 }
 
-extension WeakReference: ResourceLoadingView where T: ResourceLoadingView {
-    func display(_ viewModel: ResourceLoadingViewModel) {
-        object?.display(viewModel)
+extension WeakReference: ResourceView where T: ResourceView, T.ResourceViewModel == UIImage {
+    func display(_ model: UIImage) {
+        object?.display(model)
     }
 }
 
-extension WeakReference: FeedImageView where T: FeedImageView, T.Image == UIImage {
-    func display(_ model: FeedImageViewModel<UIImage>) {
-        object?.display(model)
+extension WeakReference: ResourceLoadingView where T: ResourceLoadingView {
+    func display(_ viewModel: ResourceLoadingViewModel) {
+        object?.display(viewModel)
     }
 }
 
