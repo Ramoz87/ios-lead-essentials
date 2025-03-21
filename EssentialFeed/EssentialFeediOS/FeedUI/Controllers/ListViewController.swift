@@ -8,15 +8,11 @@
 import UIKit
 import EssentialFeed
 
-public protocol ListViewControllerDelegate {
-    func didRequestFeedRefresh()
-}
-
 public class ListViewController: UITableViewController, UITableViewDataSourcePrefetching, ResourceLoadingView, ResourceErrorView {
     @IBOutlet private(set) public var errorView: ErrorView?
     
     private var onViewIsAppearing: (() -> Void)?
-    public var delegate: ListViewControllerDelegate?
+    public var onRefresh: (() -> Void)?
     
     private var loadingControllers = [IndexPath: FeedImageCellController]()
     
@@ -44,7 +40,7 @@ public class ListViewController: UITableViewController, UITableViewDataSourcePre
     }
     
     @IBAction func refresh() {
-        delegate?.didRequestFeedRefresh()
+        onRefresh?()
     }
     
     public func display(_ viewModel: ResourceLoadingViewModel) {
