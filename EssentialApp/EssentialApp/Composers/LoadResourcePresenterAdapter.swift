@@ -38,7 +38,7 @@ final class LoadResourcePresenterAdapter<Resource, View: ResourceView> {
     }
 }
 
-extension LoadResourcePresenterAdapter: FeedViewControllerDelegate {
+extension LoadResourcePresenterAdapter: ListViewControllerDelegate {
     func didRequestFeedRefresh() {
         loadResource()
     }

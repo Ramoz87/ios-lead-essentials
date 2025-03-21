@@ -48,10 +48,10 @@ final class FeedSnapshotTests: XCTestCase {
     
     //MARK: - Private
     
-    private func makeSUT() -> FeedViewController {
-        let bundle = Bundle(for: FeedViewController.self)
+    private func makeSUT() -> ListViewController {
+        let bundle = Bundle(for: ListViewController.self)
         let storyBoard = UIStoryboard(name: "Feed", bundle: bundle)
-        let controller = storyBoard.instantiateInitialViewController() as! FeedViewController
+        let controller = storyBoard.instantiateInitialViewController() as! ListViewController
         controller.loadViewIfNeeded()
         return controller
     }

@@ -1,5 +1,5 @@
 //
-//  FeedViewController+Helpers.swift
+//  ListViewController+Helpers.swift
 //  EssentialFeed
 //
 //  Created by Yury Ramazanov on 21.01.2025.
@@ -8,7 +8,7 @@
 import UIKit
 import EssentialFeediOS
 
-extension FeedViewController {
+extension ListViewController {
  
     var isShowingLoadingIndicator: Bool {
         return refreshControl?.isRefreshing == true

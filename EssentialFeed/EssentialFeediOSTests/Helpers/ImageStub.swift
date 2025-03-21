@@ -34,7 +34,7 @@ final class ImageStub: FeedImageCellControllerDelegate {
     func didCancelImageRequest() {}
 }
 
-extension FeedViewController {
+extension ListViewController {
     func display(_ images: [ImageStub]) {
         let model = images.map { stub in
             let cellController = FeedImageCellController(viewModel: stub.viewModel, delegate: stub)
