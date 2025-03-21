@@ -14,9 +14,9 @@ public class ListViewController: UITableViewController, UITableViewDataSourcePre
     private var onViewIsAppearing: (() -> Void)?
     public var onRefresh: (() -> Void)?
     
-    private var loadingControllers = [IndexPath: FeedImageCellController]()
+    private var loadingControllers = [IndexPath: CellController]()
     
-    private var tableModel = [FeedImageCellController]() {
+    private var tableModel = [CellController]() {
         didSet {
             tableView.reloadData()
         }
@@ -51,7 +51,7 @@ public class ListViewController: UITableViewController, UITableViewDataSourcePre
         errorView?.message = viewModel.message
     }
     
-    public func display(_ cellControllers: [FeedImageCellController]) {
+    public func display(_ cellControllers: [CellController]) {
         loadingControllers = [:]
         tableModel = cellControllers
     }
@@ -61,29 +61,30 @@ public class ListViewController: UITableViewController, UITableViewDataSourcePre
     }
     
     public override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        return cellController(for: indexPath).view(for: tableView)
+        return cellController(for: indexPath).dataSource.tableView(tableView, cellForRowAt: indexPath)
     }
     
     public override func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        cancelCellControllerLoad(for: indexPath)
+        removeLoadingController(for: indexPath)?.delegate?.tableView?(tableView, didEndDisplaying: cell, forRowAt: indexPath)
     }
     
     public func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
-        indexPaths.forEach { cellController(for: $0).load() }
+        indexPaths.forEach { cellController(for: $0).prefetching?.tableView(tableView, prefetchRowsAt: [$0]) }
     }
     
     public func tableView(_ tableView: UITableView, cancelPrefetchingForRowsAt indexPaths: [IndexPath]) {
-        indexPaths.forEach(cancelCellControllerLoad)
+        indexPaths.forEach { removeLoadingController(for: $0)?.prefetching?.tableView?(tableView, cancelPrefetchingForRowsAt: [$0]) }
     }
     
-    private func cellController(for indexPath: IndexPath) -> FeedImageCellController {
-        let model = tableModel[indexPath.row]
-        loadingControllers[indexPath] = model
-        return model
+    private func cellController(for indexPath: IndexPath) -> CellController {
+        let controller = tableModel[indexPath.row]
+        loadingControllers[indexPath] = controller
+        return controller
     }
     
-    private func cancelCellControllerLoad(for indexPath: IndexPath) {
-        loadingControllers[indexPath]?.cancel()
+    private func removeLoadingController(for indexPath: IndexPath) -> CellController? {
+        let controller = loadingControllers[indexPath]
         loadingControllers[indexPath] = nil
+        return controller
     }
 }
