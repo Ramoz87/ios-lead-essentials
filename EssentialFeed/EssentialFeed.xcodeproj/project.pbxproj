@@ -385,6 +385,7 @@
 		B703376D2D37FC20005D8200 /* EssentialFeediOS */ = {
 			isa = PBXGroup;
 			children = (
+				B790BBCC2D8DABE70051641A /* Shared UI */,
 				B78F907E2D3FCA71009C91B7 /* FeedUI */,
 			);
 			path = EssentialFeediOS;
@@ -448,10 +449,7 @@
 		B7314E5C2D5273F5000DE54C /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
-				B7314E5F2D52743D000DE54C /* UIRefreshControl+Helpers.swift */,
 				B78CCA552D43E2FC00044788 /* UIImageView+Animations.swift */,
-				B78CCA532D43E28900044788 /* UITableView+Dequeueing.swift */,
-				B78A29AC2D71E4C2004A69A8 /* UITableView+HeaderSizing.swift */,
 				B7F5FFA52D3E96D800734A23 /* UIView+Shimmering.swift */,
 			);
 			path = Helpers;
@@ -586,7 +584,6 @@
 			children = (
 				B790BBCA2D8DA8EE0051641A /* CellController.swift */,
 				B78F90862D3FDD0F009C91B7 /* FeedImageCellController.swift */,
-				B7CE2B6B2D39534A001E24CD /* ListViewController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -596,7 +593,6 @@
 			children = (
 				B7314E5C2D5273F5000DE54C /* Helpers */,
 				B7F5FF8F2D3E8CEE00734A23 /* FeedImageCell.swift */,
-				B7314E5A2D52713B000DE54C /* ErrorView.swift */,
 				B71D19822D43D6B800FCCAA0 /* Feed.storyboard */,
 				B71D19982D43D6F600FCCAA0 /* Feed.xcassets */,
 			);
@@ -610,6 +606,34 @@
 				B78F90742D3FC6E8009C91B7 /* Controllers */,
 			);
 			path = FeedUI;
+			sourceTree = "<group>";
+		};
+		B790BBCC2D8DABE70051641A /* Shared UI */ = {
+			isa = PBXGroup;
+			children = (
+				B790BBCD2D8DABFC0051641A /* Views */,
+				B7CE2B6B2D39534A001E24CD /* ListViewController.swift */,
+			);
+			path = "Shared UI";
+			sourceTree = "<group>";
+		};
+		B790BBCD2D8DABFC0051641A /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				B790BBCE2D8DAC0E0051641A /* Helpers */,
+				B7314E5A2D52713B000DE54C /* ErrorView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		B790BBCE2D8DAC0E0051641A /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				B7314E5F2D52743D000DE54C /* UIRefreshControl+Helpers.swift */,
+				B78CCA532D43E28900044788 /* UITableView+Dequeueing.swift */,
+				B78A29AC2D71E4C2004A69A8 /* UITableView+HeaderSizing.swift */,
+			);
+			path = Helpers;
 			sourceTree = "<group>";
 		};
 		B7A2B4EC2D22FABB00127C8C /* FeedStoreSpecs */ = {
