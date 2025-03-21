@@ -15,43 +15,14 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                        <view key="tableHeaderView" contentMode="scaleToFill" id="1yD-n6-pXc" customClass="ErrorView" customModule="EssentialFeediOS" customModuleProvider="target">
-                            <rect key="frame" x="0.0" y="0.0" width="393" height="62"/>
-                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                            <subviews>
-                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xDA-Sz-zNR">
-                                    <rect key="frame" x="0.0" y="0.0" width="393" height="62"/>
-                                    <gestureRecognizers/>
-                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                    <nil key="highlightedColor"/>
-                                    <connections>
-                                        <outletCollection property="gestureRecognizers" destination="f8h-Om-x17" appends="YES" id="lAY-3w-nmQ"/>
-                                    </connections>
-                                </label>
-                            </subviews>
-                            <color key="backgroundColor" systemColor="systemRedColor"/>
-                            <constraints>
-                                <constraint firstAttribute="trailing" secondItem="xDA-Sz-zNR" secondAttribute="trailing" id="093-CG-4O9"/>
-                                <constraint firstAttribute="trailing" secondItem="xDA-Sz-zNR" secondAttribute="trailing" id="3eM-0Z-Ou2"/>
-                                <constraint firstAttribute="bottom" secondItem="xDA-Sz-zNR" secondAttribute="bottom" id="NF1-I5-gzR"/>
-                                <constraint firstItem="xDA-Sz-zNR" firstAttribute="top" secondItem="1yD-n6-pXc" secondAttribute="top" id="TWb-Af-1W5"/>
-                                <constraint firstItem="xDA-Sz-zNR" firstAttribute="leading" secondItem="1yD-n6-pXc" secondAttribute="leading" id="UpQ-a1-bZT"/>
-                                <constraint firstItem="xDA-Sz-zNR" firstAttribute="top" secondItem="1yD-n6-pXc" secondAttribute="top" id="mI8-9o-Ddz"/>
-                                <constraint firstAttribute="bottom" secondItem="xDA-Sz-zNR" secondAttribute="bottom" id="olA-at-VIw"/>
-                                <constraint firstItem="xDA-Sz-zNR" firstAttribute="leading" secondItem="1yD-n6-pXc" secondAttribute="leading" id="wie-iB-xia"/>
-                            </constraints>
-                            <connections>
-                                <outlet property="label" destination="xDA-Sz-zNR" id="p2Q-iS-dqA"/>
-                            </connections>
-                        </view>
                         <view key="tableFooterView" contentMode="scaleToFill" id="GWk-ug-Zph">
-                            <rect key="frame" x="0.0" y="700" width="393" height="16"/>
+                            <rect key="frame" x="0.0" y="638" width="393" height="16"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         </view>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" reuseIdentifier="FeedImageCell" rowHeight="560" id="Vfg-C4-vb2" customClass="FeedImageCell" customModule="EssentialFeediOS" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="112" width="393" height="560"/>
+                                <rect key="frame" x="0.0" y="50" width="393" height="560"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="Vfg-C4-vb2" id="ZdM-BJ-dIy">
                                     <rect key="frame" x="0.0" y="0.0" width="393" height="560"/>
@@ -176,16 +147,9 @@ Location</string>
                             <action selector="refresh" destination="nnk-t3-4JC" eventType="valueChanged" id="Flj-cm-Npx"/>
                         </connections>
                     </refreshControl>
-                    <connections>
-                        <outlet property="errorView" destination="1yD-n6-pXc" id="6kF-5P-586"/>
-                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ZSj-Ln-Bxg" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-                <tapGestureRecognizer id="f8h-Om-x17">
-                    <connections>
-                        <action selector="hideMessageAnimated" destination="1yD-n6-pXc" id="DNH-9g-71Y"/>
-                    </connections>
-                </tapGestureRecognizer>
+                <tapGestureRecognizer id="f8h-Om-x17"/>
             </objects>
             <point key="canvasLocation" x="454.19847328244271" y="-3.5211267605633805"/>
         </scene>
@@ -197,9 +161,6 @@ Location</string>
         </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-        </systemColor>
-        <systemColor name="systemRedColor">
-            <color red="1" green="0.23137254901960785" blue="0.18823529411764706" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

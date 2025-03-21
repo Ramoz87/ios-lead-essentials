@@ -15,7 +15,7 @@ extension ListViewController {
     }
     
     var errorMessage: String? {
-        return errorView?.message
+        return errorView.message
     }
 
     private var feedImagesSection: Int {
@@ -57,6 +57,10 @@ extension ListViewController {
     
     func numberOfRenderedFeedImageViews() -> Int {
         return tableView.numberOfRows(inSection: feedImagesSection)
+    }
+    
+    func simulateErrorViewTap() {
+        errorView.simulateTap()
     }
     
     func feedImageView(at row: Int) -> UITableViewCell? {
