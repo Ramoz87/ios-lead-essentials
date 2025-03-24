@@ -34,7 +34,7 @@ final class FeedViewAdapter: ResourceView {
                 loadingView: WeakReference(object: view),
                 errorView: WeakReference(object: view),
                 mapper: UIImage.tryMake)
-            return CellController(view)
+            return CellController(id: model, view)
         }
         controller?.display(cells)
     }

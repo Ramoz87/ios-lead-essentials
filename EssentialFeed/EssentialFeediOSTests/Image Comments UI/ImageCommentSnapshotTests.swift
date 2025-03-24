@@ -56,6 +56,6 @@ final class ImageCommentSnapshotTests: XCTestCase {
                     username: "a."
                 )
             ),
-        ].map { CellController($0) }
+        ].map { CellController(id: UUID(), $0) }
     }
 }
