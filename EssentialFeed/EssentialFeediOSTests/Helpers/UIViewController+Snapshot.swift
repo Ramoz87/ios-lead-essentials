@@ -20,7 +20,7 @@ struct SnapshotConfiguration {
 }
 
 extension SnapshotConfiguration {
-    static func iPhone8(style: UIUserInterfaceStyle) -> SnapshotConfiguration {
+    static func iPhone8(style: UIUserInterfaceStyle, contentSize: UIContentSizeCategory = .medium) -> SnapshotConfiguration {
         return SnapshotConfiguration(
             size: CGSize(width: 375, height: 667),
             safeAreaInsets: UIEdgeInsets(top: 20, left: 0, bottom: 0, right: 0),
@@ -28,7 +28,7 @@ extension SnapshotConfiguration {
             traitCollection: UITraitCollection(mutations: { traits in
                 traits.forceTouchCapability = .available
                 traits.layoutDirection = .leftToRight
-                traits.preferredContentSizeCategory = .medium
+                traits.preferredContentSizeCategory = contentSize
                 traits.userInterfaceIdiom = .phone
                 traits.horizontalSizeClass = .compact
                 traits.verticalSizeClass = .regular
