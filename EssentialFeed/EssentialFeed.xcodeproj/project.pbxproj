@@ -125,6 +125,7 @@
 		B7F5FFA62D3E96DD00734A23 /* UIView+Shimmering.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F5FFA52D3E96D800734A23 /* UIView+Shimmering.swift */; };
 		B7FC11B02D916D5C00257AE5 /* FEED_WITH_CONTENT_light_extraExtraExtraLarge.png in Resources */ = {isa = PBXBuildFile; fileRef = B7FC11AF2D916D5C00257AE5 /* FEED_WITH_CONTENT_light_extraExtraExtraLarge.png */; };
 		B7FC11B22D916DB300257AE5 /* IMAGE_COMMENTS_light_extraExtraExtraLarge.png in Resources */ = {isa = PBXBuildFile; fileRef = B7FC11B12D916DB300257AE5 /* IMAGE_COMMENTS_light_extraExtraExtraLarge.png */; };
+		B7FC11B42D9172D000257AE5 /* UIView+Container.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC11B32D9172CA00257AE5 /* UIView+Container.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -290,6 +291,7 @@
 		B7F5FFA52D3E96D800734A23 /* UIView+Shimmering.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Shimmering.swift"; sourceTree = "<group>"; };
 		B7FC11AF2D916D5C00257AE5 /* FEED_WITH_CONTENT_light_extraExtraExtraLarge.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = FEED_WITH_CONTENT_light_extraExtraExtraLarge.png; sourceTree = "<group>"; };
 		B7FC11B12D916DB300257AE5 /* IMAGE_COMMENTS_light_extraExtraExtraLarge.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = IMAGE_COMMENTS_light_extraExtraExtraLarge.png; sourceTree = "<group>"; };
+		B7FC11B32D9172CA00257AE5 /* UIView+Container.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Container.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -669,6 +671,7 @@
 				B7314E5F2D52743D000DE54C /* UIRefreshControl+Helpers.swift */,
 				B78CCA532D43E28900044788 /* UITableView+Dequeueing.swift */,
 				B78A29AC2D71E4C2004A69A8 /* UITableView+HeaderSizing.swift */,
+				B7FC11B32D9172CA00257AE5 /* UIView+Container.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -1218,6 +1221,7 @@
 				B7CE2B6C2D39536D001E24CD /* ListViewController.swift in Sources */,
 				B78CCA542D43E29D00044788 /* UITableView+Dequeueing.swift in Sources */,
 				B7F5FF902D3E8CF400734A23 /* FeedImageCell.swift in Sources */,
+				B7FC11B42D9172D000257AE5 /* UIView+Container.swift in Sources */,
 				B78CCA562D43E30400044788 /* UIImageView+Animations.swift in Sources */,
 				B7F5FFA62D3E96DD00734A23 /* UIView+Shimmering.swift in Sources */,
 				B78A29AD2D71E4C6004A69A8 /* UITableView+HeaderSizing.swift in Sources */,
