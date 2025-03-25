@@ -16,7 +16,6 @@ final class LoadResourcePresenterAdapter<Resource, View: ResourceView> {
     private var cancellable: AnyCancellable?
     var presenter: LoadResourcePresenter<Resource, View>?
     
-    
     init(loader: @escaping () -> AnyPublisher<Resource, Error>) {
         self.loader = loader
     }
