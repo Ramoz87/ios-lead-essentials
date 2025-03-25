@@ -9,18 +9,6 @@ import UIKit
 import EssentialFeediOS
 
 extension ListViewController {
- 
-    var isShowingLoadingIndicator: Bool {
-        return refreshControl?.isRefreshing == true
-    }
-    
-    var errorMessage: String? {
-        return errorView.message
-    }
-
-    private var feedImagesSection: Int {
-        return 0
-    }
     
     private var dataSource: (any UITableViewDataSource)? {
         return tableView.dataSource
@@ -30,6 +18,14 @@ extension ListViewController {
     }
     private var prefetchDataSource: (any UITableViewDataSourcePrefetching)? {
         return tableView.prefetchDataSource
+    }
+    
+    var isShowingLoadingIndicator: Bool {
+        return refreshControl?.isRefreshing == true
+    }
+    
+    var errorMessage: String? {
+        return errorView.message
     }
     
     func replaceRefreshControlWithFakeForiOS17() {
@@ -55,12 +51,19 @@ extension ListViewController {
         refreshControl?.simulatePullToRefresh()
     }
     
-    func numberOfRenderedFeedImageViews() -> Int {
-        tableView.numberOfSections == 0 ? 0 : tableView.numberOfRows(inSection: feedImagesSection)
-    }
-    
     func simulateErrorViewTap() {
         errorView.simulateTap()
+    }
+}
+
+extension ListViewController {
+    
+    private var feedImagesSection: Int {
+        return 0
+    }
+    
+    func numberOfRenderedFeedImageViews() -> Int {
+        tableView.numberOfSections == 0 ? 0 : tableView.numberOfRows(inSection: feedImagesSection)
     }
     
     func feedImageView(at row: Int) -> UITableViewCell? {
@@ -107,6 +110,35 @@ extension ListViewController {
         
         let index = IndexPath(row: row, section: feedImagesSection)
         prefetchDataSource?.tableView?(tableView, cancelPrefetchingForRowsAt: [index])
+    }
+}
+
+extension ListViewController {
+    
+    private var commentsSection: Int {
+        return 0
+    }
+    
+    func numberOfRenderedComments() -> Int {
+        tableView.numberOfSections == 0 ? 0 :  tableView.numberOfRows(inSection: commentsSection)
+    }
+
+    func commentMessage(at row: Int) -> String? {
+        commentView(at: row)?.messageLabel.text
+    }
+
+    func commentDate(at row: Int) -> String? {
+        commentView(at: row)?.dateLabel.text
+    }
+
+    func commentUsername(at row: Int) -> String? {
+        commentView(at: row)?.usernameLabel.text
+    }
+
+    private func commentView(at row: Int) -> ImageCommentCell? {
+        guard numberOfRenderedComments() > row else { return nil }
+        let index = IndexPath(row: row, section: commentsSection)
+        return dataSource?.tableView(tableView, cellForRowAt: index) as? ImageCommentCell
     }
 }
 
