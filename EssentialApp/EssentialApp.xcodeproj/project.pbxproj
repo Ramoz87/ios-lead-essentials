@@ -43,6 +43,7 @@
 		B7C346592D662870004A2763 /* EssentialAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EssentialAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B7C346EA2D662B01004A2763 /* EssentialFeed.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = EssentialFeed.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B7C346EB2D662B01004A2763 /* EssentialFeediOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = EssentialFeediOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B7C820AA2D92FC2A0075F639 /* EssentialApp.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = EssentialApp.xctestplan; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -94,6 +95,7 @@
 		B7C3463A2D66286E004A2763 = {
 			isa = PBXGroup;
 			children = (
+				B7C820AB2D92FC2A0075F639 /* TestPlans */,
 				B7C346452D66286E004A2763 /* EssentialApp */,
 				B7C3465C2D662870004A2763 /* EssentialAppTests */,
 				B7C346E92D662B01004A2763 /* Frameworks */,
@@ -117,6 +119,14 @@
 				B7C346EB2D662B01004A2763 /* EssentialFeediOS.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		B7C820AB2D92FC2A0075F639 /* TestPlans */ = {
+			isa = PBXGroup;
+			children = (
+				B7C820AA2D92FC2A0075F639 /* EssentialApp.xctestplan */,
+			);
+			path = TestPlans;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
