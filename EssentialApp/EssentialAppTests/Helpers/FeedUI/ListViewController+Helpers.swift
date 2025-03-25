@@ -88,7 +88,6 @@ extension ListViewController {
         let delegate = tableView.delegate
         let index = IndexPath(row: row, section: feedImagesSection)
         delegate?.tableView?(tableView, willDisplay: view!, forRowAt: index)
-        
         return view
     }
     
@@ -110,6 +109,11 @@ extension ListViewController {
         
         let index = IndexPath(row: row, section: feedImagesSection)
         prefetchDataSource?.tableView?(tableView, cancelPrefetchingForRowsAt: [index])
+    }
+    
+    func simulateTapOnFeedImage(at row: Int) {
+        let index = IndexPath(row: row, section: feedImagesSection)
+        delegate?.tableView?(tableView, didSelectRowAt: index)
     }
 }
 

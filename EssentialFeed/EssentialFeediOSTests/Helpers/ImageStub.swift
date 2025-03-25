@@ -37,7 +37,7 @@ final class ImageStub: FeedImageCellControllerDelegate {
 extension ListViewController {
     func display(_ images: [ImageStub]) {
         let model = images.map { stub in
-            let controller = FeedImageCellController(viewModel: stub.viewModel, delegate: stub)
+            let controller = FeedImageCellController(viewModel: stub.viewModel, delegate: stub, selection: {})
             stub.controller = controller
             return CellController(id: UUID(),  controller)
         }
