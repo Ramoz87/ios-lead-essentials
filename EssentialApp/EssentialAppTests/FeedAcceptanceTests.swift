@@ -53,6 +53,14 @@ final class FeedAcceptanceTests: XCTestCase {
         
         XCTAssertNotNil(store.feedCache, "Expected to keep non-expired cache")
     }
+    
+    func test_onFeedImageSelection_displaysComments() {
+        let comments = showCommentsForFirstImage()
+        
+        XCTAssertEqual(comments.numberOfRenderedComments(), 1)
+        XCTAssertEqual(comments.commentMessage(at: 0), makeCommentMessage())
+    }
+    
     //MARK: - Private
     
     private func launch(
@@ -76,24 +84,52 @@ final class FeedAcceptanceTests: XCTestCase {
         sut.sceneWillResignActive(scene)
     }
     
-    private let imageUrl = "http://image.com"
+    private func showCommentsForFirstImage() -> ListViewController {
+        let feed = launch(httpClient: .online(successResult), store: .empty)
+        
+        feed.simulateTapOnFeedImage(at: 0)
+        RunLoop.current.run(until: Date() + 1)
+        
+        let ctrl = feed.navigationController?.topViewController as! ListViewController
+        ctrl.simulateAppearance()
+        return ctrl
+    }
     
     private func data(for url: URL) -> Data {
-        switch url.absoluteString {
-        case imageUrl: makeImageData()
-        default: makeFeedData()
+        switch url.path {
+        case "/image-1", "/image-2": makeImageData()
+        case "/essential-feed/v1/feed": makeFeedData()
+        case "/essential-feed/v1/image/2AB2AE66-A4B7-4A16-B374-51BBAC8DB086/comments": makeCommentsData()
+        default: Data()
         }
     }
     
     private func makeFeedData() -> Data {
         return try! JSONSerialization.data(withJSONObject: ["items": [
-            ["id": UUID().uuidString, "image": imageUrl],
-            ["id": UUID().uuidString, "image": imageUrl]
+            ["id": "2AB2AE66-A4B7-4A16-B374-51BBAC8DB086", "image": "http://feed.com/image-1"],
+            ["id": "A28F5FE3-27A7-44E9-8DF5-53742D0E4A5A", "image": "http://feed.com/image-2"]
         ]])
     }
     
     private func makeImageData() -> Data {
         return UIImage.make(withColor: .red).pngData()!
+    }
+    
+    private func makeCommentsData() -> Data {
+        return try! JSONSerialization.data(withJSONObject: ["items": [
+            [
+                "id": UUID().uuidString,
+                "message": makeCommentMessage(),
+                "created_at": "2020-05-20T11:24:59+0000",
+                "author": [
+                    "username": "a username"
+                ]
+            ],
+        ]])
+    }
+    
+    private func makeCommentMessage() -> String {
+        "a message"
     }
         
     private func successResult(for url: URL) -> HTTPClient.Result {
