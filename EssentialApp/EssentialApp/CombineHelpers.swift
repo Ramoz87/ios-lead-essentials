@@ -12,10 +12,9 @@ public extension Paginated {
     typealias Publisher = AnyPublisher<Self, Error>
     
     init(items: [Item], loadMorePublisher: (() -> Publisher)?) {
-
-        let loadMore = loadMorePublisher.map { publisher in
-            
-            return { (completion: @escaping LoadMoreBlock) in
+        
+        self.init(items: items, loadMore: loadMorePublisher.map { publisher in
+            return { completion in
                 
                 publisher().subscribe(
                     Subscribers.Sink(
@@ -28,9 +27,7 @@ public extension Paginated {
                             completion(.success(result))
                         }))
             }
-        }
-        
-        self.init(items: items, loadMore: loadMore)
+        })
     }
     
     var loadMorePublisher: Publisher? {

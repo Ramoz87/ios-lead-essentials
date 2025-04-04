@@ -19,38 +19,36 @@ class LoaderSpy: FeedImageDataLoader {
         feedRequests.count
     }
     
-    var loadMoreCallCount: Int {
-        loadMoreRequests.count
-    }
-    
-    func loadPublisher() -> AnyPublisher<Paginated<FeedImage>, Error> {
+    func loadPublisher() -> Paginated<FeedImage>.Publisher {
         let publisher = PassthroughSubject<Paginated<FeedImage>, Error>()
         feedRequests.append(publisher)
         return publisher.eraseToAnyPublisher()
     }
     
     func completeFeedLoading(with feed: [FeedImage] = [], at index: Int = 0) {
-        let page = Paginated(items: feed, loadMorePublisher: { [weak self] in
-            let publisher = PassthroughSubject<Paginated<FeedImage>, Error>()
-            self?.loadMoreRequests.append(publisher)
-            return publisher.eraseToAnyPublisher()
-        })
-        feedRequests[index].send(page)
+        feedRequests[index].send(Paginated(items: feed, loadMorePublisher: loadMorePublisher()))
     }
     
     func completeFeedLoadingWithError(at index: Int = 0) {
         feedRequests[index].send(completion: .failure(anyNSError()))
     }
     
+    //MARK: - FeedLoadMore
+    
+    var loadMoreCallCount: Int {
+        loadMoreRequests.count
+    }
+    
+    func loadMorePublisher() -> () -> Paginated<FeedImage>.Publisher {
+        return { [weak self] in
+            let publisher = PassthroughSubject<Paginated<FeedImage>, Error>()
+            self?.loadMoreRequests.append(publisher)
+            return publisher.eraseToAnyPublisher()
+        }
+    }
+    
     func completeLoadMore(with feed: [FeedImage] = [], lastPage: Bool = false, at index: Int = 0) {
-        loadMoreRequests[index].send(
-            Paginated(
-                items: feed,
-                loadMorePublisher: lastPage ? nil : { [weak self] in
-                    let publisher = PassthroughSubject<Paginated<FeedImage>, Error>()
-                    self?.loadMoreRequests.append(publisher)
-                    return publisher.eraseToAnyPublisher()
-                }))
+        loadMoreRequests[index].send(Paginated(items: feed, loadMorePublisher: lastPage ? nil : loadMorePublisher()))
     }
     
     func completeLoadMoreWithError(at index: Int = 0) {
@@ -58,19 +56,12 @@ class LoaderSpy: FeedImageDataLoader {
     }
     
     //MARK: - FeedImageDataLoader
-   
-    private struct TaskSpy: FeedImageDataLoaderTask {
-        let cancelCallback: () -> Void
-        func cancel() {
-            cancelCallback()
-        }
-    }
-    var loadedImageURLs: [URL] {
-        return imageRequests.map { $0.url }
-    }
     
     private var imageRequests = [(url: URL, completion: (FeedImageDataLoader.Result) -> Void)]()
     private(set) var cancelledImageURLs = [URL]()
+    var loadedImageURLs: [URL] {
+        return imageRequests.map { $0.url }
+    }
     
     func loadImageData(from url: URL, completion: @escaping (FeedImageDataLoader.Result) -> Void) -> FeedImageDataLoaderTask {
         imageRequests.append((url, completion))
@@ -83,5 +74,12 @@ class LoaderSpy: FeedImageDataLoader {
 
     func completeImageLoadingWithError(at index: Int = 0) {
         imageRequests[index].completion(.failure(anyNSError()))
+    }
+    
+    private struct TaskSpy: FeedImageDataLoaderTask {
+        let cancelCallback: () -> Void
+        func cancel() {
+            cancelCallback()
+        }
     }
 }
