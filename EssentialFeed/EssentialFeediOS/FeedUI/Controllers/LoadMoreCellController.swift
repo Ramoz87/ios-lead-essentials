@@ -10,7 +10,12 @@ import EssentialFeed
 
 public class LoadMoreCellController: NSObject, UITableViewDataSource, UITableViewDelegate {
     
-    private let loadCell = LoadMoreCell()
+    private lazy var loadCell: LoadMoreCell = {
+        let cell = LoadMoreCell()
+        cell.selectionStyle = .none
+        return cell
+    }()
+    
     private let callback: () -> Void
     
     public init(callback: @escaping () -> Void) {
