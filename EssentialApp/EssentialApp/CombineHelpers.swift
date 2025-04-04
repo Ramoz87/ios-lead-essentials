@@ -11,6 +11,28 @@ import EssentialFeed
 public extension Paginated {
     typealias Publisher = AnyPublisher<Self, Error>
     
+    init(items: [Item], loadMorePublisher: (() -> Publisher)?) {
+
+        let loadMore = loadMorePublisher.map { publisher in
+            
+            return { (completion: @escaping LoadMoreBlock) in
+                
+                publisher().subscribe(
+                    Subscribers.Sink(
+                        receiveCompletion: { result in
+                            if case let .failure(error) = result {
+                                completion(.failure(error))
+                            }
+                        },
+                        receiveValue: { result in
+                            completion(.success(result))
+                        }))
+            }
+        }
+        
+        self.init(items: items, loadMore: loadMore)
+    }
+    
     var loadMorePublisher: Publisher? {
         guard let loadMore else { return nil }
         return Deferred { Future(loadMore) }.eraseToAnyPublisher()
