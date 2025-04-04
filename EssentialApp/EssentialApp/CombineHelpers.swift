@@ -8,6 +8,15 @@ import Combine
 import Foundation
 import EssentialFeed
 
+public extension Paginated {
+    typealias Publisher = AnyPublisher<Self, Error>
+    
+    var loadMorePublisher: Publisher? {
+        guard let loadMore else { return nil }
+        return Deferred { Future(loadMore) }.eraseToAnyPublisher()
+    }
+}
+
 public extension HTTPClient {
     typealias Publisher = AnyPublisher<(Data, HTTPURLResponse), Error>
 
