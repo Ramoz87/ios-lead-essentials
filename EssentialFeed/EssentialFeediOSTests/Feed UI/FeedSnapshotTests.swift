@@ -13,7 +13,7 @@ final class FeedSnapshotTests: XCTestCase {
     func test_feedWithContent() {
         let sut = makeSUT()
         
-        sut.display(images())
+        sut.display(feedWithImages())
         
         assert(snapshot: sut.snapshot(for: .iPhone8(style: .light)), named: "FEED_WITH_CONTENT_light")
         assert(snapshot: sut.snapshot(for: .iPhone8(style: .dark)), named: "FEED_WITH_CONTENT_dark")
@@ -23,10 +23,19 @@ final class FeedSnapshotTests: XCTestCase {
     func test_feedWithFailedImageLoading() {
         let sut = makeSUT()
         
-        sut.display(failedImages())
+        sut.display(feedWithFailedImages())
         
         assert(snapshot: sut.snapshot(for: .iPhone8(style: .light)), named: "FEED_WITH_FAILED_IMAGE_LOADING_light")
         assert(snapshot: sut.snapshot(for: .iPhone8(style: .dark)), named: "FEED_WITH_FAILED_IMAGE_LOADING_dark")
+    }
+    
+    func test_feedWithLoadMoreIndicator() {
+        let sut = makeSUT()
+        
+        sut.display(feedWithLoadMoreIndicator())
+        
+        assert(snapshot: sut.snapshot(for: .iPhone8(style: .light)), named: "FEED_WITH_LOAD_MORE_INDICATOR_light")
+        assert(snapshot: sut.snapshot(for: .iPhone8(style: .dark)), named: "FEED_WITH_LOAD_MORE_INDICATOR_dark")
     }
     
     //MARK: - Private
@@ -42,7 +51,7 @@ final class FeedSnapshotTests: XCTestCase {
         return controller
     }
         
-    private func images() -> [ImageStub] {
+    private func feedWithImages() -> [ImageStub] {
         return [
             ImageStub(
                 description: "The East Side Gallery is an open-air gallery in Berlin. It consists of a series of murals painted directly on a 1,316 m long remnant of the Berlin Wall, located near the centre of Berlin, on Mühlenstraße in Friedrichshain-Kreuzberg. The gallery has official status as a Denkmal, or heritage-protected landmark.",
@@ -56,7 +65,7 @@ final class FeedSnapshotTests: XCTestCase {
             )]
     }
     
-    private func failedImages() -> [ImageStub] {
+    private func feedWithFailedImages() -> [ImageStub] {
         return [
             ImageStub(
                 description: nil,
@@ -68,6 +77,19 @@ final class FeedSnapshotTests: XCTestCase {
                 location: "Brighton Seafront",
                 image: nil
             )
+        ]
+    }
+    
+    private func feedWithLoadMoreIndicator() -> [CellController] {
+        let stub = feedWithImages().last!
+        let feedImageCellController = FeedImageCellController(viewModel: stub.viewModel, delegate: stub, selection: {})
+        stub.controller = feedImageCellController
+        
+        let loadMoreCellController = LoadMoreCellController()
+        loadMoreCellController.display(ResourceLoadingViewModel(isLoading: true))
+        return [
+            CellController(id: UUID(), feedImageCellController),
+            CellController(id: UUID(), loadMoreCellController)
         ]
     }
 }
