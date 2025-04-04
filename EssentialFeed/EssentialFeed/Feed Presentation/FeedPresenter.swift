@@ -14,8 +14,4 @@ public final class FeedPresenter {
                                  bundle: .init(for: FeedPresenter.self),
                                  comment: "Title for the feed view")
     }
-    
-    public static func map(_ feed: Paginated<FeedImage>) -> FeedViewModel {
-        FeedViewModel(feed: feed.items)
-    }
 }

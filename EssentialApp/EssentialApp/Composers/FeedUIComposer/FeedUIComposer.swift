@@ -29,8 +29,7 @@ public final class FeedUIComposer {
                 imageLoader: imageLoader,
                 selection: selection),
             loadingView: WeakReference(object: feedController),
-            errorView: WeakReference(object: feedController),
-            mapper: FeedPresenter.map)
+            errorView: WeakReference(object: feedController))
         
         return feedController
     }

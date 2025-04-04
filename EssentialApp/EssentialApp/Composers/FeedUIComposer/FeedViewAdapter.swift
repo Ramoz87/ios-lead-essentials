@@ -22,8 +22,8 @@ final class FeedViewAdapter: ResourceView {
         self.selection = selection
     }
     
-    func display(_ viewModel: FeedViewModel) {
-        let cells = viewModel.feed.map { model in
+    func display(_ viewModel: Paginated<FeedImage>) {
+        let cells = viewModel.items.map { model in
             let adapter = ImageDataPresentationAdapter(loader: { [imageLoader] in
                 imageLoader(model.url)
             })
