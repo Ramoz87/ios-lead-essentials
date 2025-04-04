@@ -26,14 +26,19 @@ public class LoadMoreCellController: NSObject, UITableViewDataSource, UITableVie
     }
     
     public func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        guard !loadCell.isLoading else { return }
-        callback()
+        loadIfNeeded()
     }
     
     public func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
     }
     
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        loadIfNeeded()
+    }
+    
+    private func loadIfNeeded() {
+        guard !loadCell.isLoading else { return }
+        callback()
     }
 }
 
