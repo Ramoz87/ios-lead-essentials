@@ -94,22 +94,28 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         navigationController.pushViewController(comments, animated: true)
     }
     
-    private func makeRemoteCommentsLoader(url: URL) -> () -> AnyPublisher<[ImageComment], Error> {
-        return  { [client] in
-            client
-                .getPublisher(url: url)
-                .tryMap(ImageCommentsMapper.map)
-                .eraseToAnyPublisher()
-        }
+    private func makeRemoteFeedLoaderWithLocalFallback() -> Paginated<FeedImage>.Publisher {
+        makeRemoteFeedLoader()
+            .caching(to: localFeedLoader)
+            .fallback(to: localFeedLoader.loadPublisher())
+            .map { self.makePage(items: $0, last: $0.last) }
+            .eraseToAnyPublisher()
     }
     
-    private func makeRemoteFeedLoaderWithLocalFallback() -> AnyPublisher<[FeedImage], Error> {
-        let url = FeedEndpoint.get.url(baseURL: baseURL)
+    private func makeRemoteLoadMoreLoader(last: FeedImage?) -> Paginated<FeedImage>.Publisher {
+        localFeedLoader
+            .loadPublisher()
+            .zip(makeRemoteFeedLoader(after: last))
+            .map { self.makePage(items: $0 + $1, last: $1.last) }
+            .caching(to: localFeedLoader)
+    }
+    
+    private func makeRemoteFeedLoader(after: FeedImage? = nil) -> AnyPublisher<[FeedImage], Error> {
+        let url = FeedEndpoint.get(after: after).url(baseURL: baseURL)
         return client
             .getPublisher(url: url)
             .tryMap(RemoteFeedLoaderDataMapper.map)
-            .caching(to: localFeedLoader)
-            .fallback(to: localFeedLoader.loadPublisher())
+            .eraseToAnyPublisher()
     }
     
     private func makeLocalImageLoaderWithRemoteFallback(url: URL) -> FeedImageDataLoader.Publisher {
@@ -120,5 +126,20 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 .tryMap(RemoteFeedImageDataMapper.map)
                 .caching(to: localImageLoader, using: url)
             )
+    }
+    
+    private func makeRemoteCommentsLoader(url: URL) -> () -> AnyPublisher<[ImageComment], Error> {
+        return  { [client] in
+            client
+                .getPublisher(url: url)
+                .tryMap(ImageCommentsMapper.map)
+                .eraseToAnyPublisher()
+        }
+    }
+    
+    private func makePage(items: [FeedImage], last: FeedImage?) -> Paginated<FeedImage> {
+        Paginated(items: items, loadMorePublisher: last.map { last in
+            { self.makeRemoteLoadMoreLoader(last: last) }
+        })
     }
 }

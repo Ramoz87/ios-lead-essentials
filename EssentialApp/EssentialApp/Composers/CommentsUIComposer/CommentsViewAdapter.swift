@@ -11,8 +11,6 @@ import EssentialFeediOS
 final class CommentsViewAdapter: ResourceView {
     private weak var controller: ListViewController?
     
-    private typealias ImageDataPresentationAdapter = LoadResourcePresenterAdapter<Data, WeakReference<FeedImageCellController>>
-    
     init(controller: ListViewController) {
         self.controller = controller
     }
