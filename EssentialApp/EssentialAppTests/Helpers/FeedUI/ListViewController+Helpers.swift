@@ -70,9 +70,8 @@ extension ListViewController {
 
 extension ListViewController {
     
-    private var feedImagesSection: Int {
-        return 0
-    }
+    private var feedImagesSection: Int { 0 }
+    private var feedLoadMoreSection: Int { 1 }
     
     func numberOfRenderedFeedImageViews() -> Int {
         numberOfRows(in: feedImagesSection)
@@ -124,6 +123,13 @@ extension ListViewController {
     func simulateTapOnFeedImage(at row: Int) {
         let index = IndexPath(row: row, section: feedImagesSection)
         delegate?.tableView?(tableView, didSelectRowAt: index)
+    }
+    
+    func simulateLoadMoreFeedAction() {
+        guard let view = cell(row: 0, section: feedLoadMoreSection) else { return }
+        
+        let index = IndexPath(row: 0, section: feedLoadMoreSection)
+        delegate?.tableView?(tableView, willDisplay: view, forRowAt: index)
     }
 }
 
