@@ -13,10 +13,10 @@ import EssentialFeediOS
 public final class FeedUIComposer {
     private init() {}
     
-    private typealias FeedPresentationAdapter = LoadResourcePresenterAdapter<[FeedImage], FeedViewAdapter>
+    private typealias FeedPresentationAdapter = LoadResourcePresenterAdapter<Paginated<FeedImage>, FeedViewAdapter>
     
     public static func feedViewController(
-        feedLoader: @escaping () -> AnyPublisher<[FeedImage], Error>,
+        feedLoader: @escaping () -> AnyPublisher<Paginated<FeedImage>, Error>,
         imageLoader: @escaping (URL) -> FeedImageDataLoader.Publisher,
         selection: @escaping (FeedImage) -> Void = { _ in }
     ) -> ListViewController {
