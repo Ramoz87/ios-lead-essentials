@@ -19,9 +19,7 @@ extension CoreDataFeedStore: FeedStore {
     public func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertCompletion) {
         perform { context in
             completion(Result {
-                if let cache = try ManagedCache.find(in: context) {
-                    context.delete(cache)
-                }
+                try ManagedCache.find(in: context).map(context.delete).map(context.save)
                 let managedCache = ManagedCache(context: context)
                 managedCache.timestamp = timestamp
                 managedCache.feed = ManagedFeedImage.images(from: feed, in: context)

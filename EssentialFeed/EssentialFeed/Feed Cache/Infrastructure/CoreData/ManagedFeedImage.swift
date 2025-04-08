@@ -36,8 +36,10 @@ extension ManagedFeedImage {
             managed.imageDescription = local.description
             managed.location = local.location
             managed.url = local.url
+            managed.data = context.userInfo[local.url] as? Data
             return managed
         }
+        context.userInfo.removeAllObjects()
         return NSOrderedSet(array: managedFeedImages)
     }
     
@@ -47,5 +49,15 @@ extension ManagedFeedImage {
         request.returnsObjectsAsFaults = false
         request.fetchLimit = 1
         return try context.fetch(request).first
+    }
+    
+    static func data(with url: URL, in context: NSManagedObjectContext) throws -> Data? {
+        if let data = context.userInfo[url] as? Data { return data }
+        return try first(with: url, in: context)?.data
+    }
+    
+    override func prepareForDeletion() {
+        super.prepareForDeletion()
+        managedObjectContext?.userInfo[url] = data
     }
 }

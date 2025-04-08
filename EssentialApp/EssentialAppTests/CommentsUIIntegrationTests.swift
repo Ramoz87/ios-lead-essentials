@@ -25,17 +25,18 @@ final class CommentsUIIntegrationTests: XCTestCase {
         let (sut, loader) = makeSUT()
                 
         sut.simulateAppearance()
-        XCTAssertEqual(loader.loadCallCount, 1, "Expected loading requests when view appears time")
-        loader.completeLoading()
-        
-        sut.simulateAppearance()
-        XCTAssertEqual(loader.loadCallCount, 1, "Expected no loading requests when view appeares another time")
+        XCTAssertEqual(loader.loadCallCount, 1, "Expected loading requests when view appears first time")
         
         sut.simulateUserInitiatedReload()
-        XCTAssertEqual(loader.loadCallCount, 2, "Expected a loading request when user initiates a reload")
+        XCTAssertEqual(loader.loadCallCount, 1, "Expected no request until previous completes")
         
+        loader.completeLoading(at: 0)
         sut.simulateUserInitiatedReload()
-        XCTAssertEqual(loader.loadCallCount, 3, "Expected another loading request when user initiates a reload")
+        XCTAssertEqual(loader.loadCallCount, 2, "Expected another loading request once user initiates a reload")
+        
+        loader.completeLoading(at: 1)
+        sut.simulateUserInitiatedReload()
+        XCTAssertEqual(loader.loadCallCount, 3, "Expected yet another loading request once user initiates another reload")
     }
     
     func test_loadCommentsActions_loadingIndicatorIsVisibleWhileLoadingFeed() {
@@ -197,6 +198,7 @@ final class CommentsUIIntegrationTests: XCTestCase {
         
         func completeLoading(with feed: [ImageComment] = [], at index: Int = 0) {
             requests[index].send(feed)
+            requests[index].send(completion: .finished)
         }
         
         func completeLoadingWithError(at index: Int = 0) {
