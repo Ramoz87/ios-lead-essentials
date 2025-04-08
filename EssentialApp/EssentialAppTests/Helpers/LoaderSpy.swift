@@ -27,6 +27,7 @@ class LoaderSpy: FeedImageDataLoader {
     
     func completeFeedLoading(with feed: [FeedImage] = [], at index: Int = 0) {
         feedRequests[index].send(Paginated(items: feed, loadMorePublisher: loadMorePublisher()))
+        feedRequests[index].send(completion: .finished)
     }
     
     func completeFeedLoadingWithError(at index: Int = 0) {
