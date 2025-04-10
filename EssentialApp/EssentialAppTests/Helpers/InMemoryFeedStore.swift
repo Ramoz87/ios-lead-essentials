@@ -29,18 +29,16 @@ class InMemoryFeedStore: FeedStore, FeedImageDataStore {
     
     //MARK: - FeedStore
     
-    func deleteCachedFeed(completion: @escaping FeedStore.DeleteCompletion) {
+    func deleteCachedFeed() throws {
         feedCache = nil
-        completion(.success(()))
     }
     
-    func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping FeedStore.InsertCompletion) {
+    func insert(_ feed: [LocalFeedImage], timestamp: Date) throws {
         feedCache = CachedFeed(feed: feed, timestamp: timestamp)
-        completion(.success(()))
     }
     
-    func retrieve(completion: @escaping FeedStore.RetrieveCompletion) {
-        completion(.success(feedCache))
+    func retrieve() throws -> CachedFeed? {
+        feedCache
     }
     
     //MARK: - FeedImageDataStore
