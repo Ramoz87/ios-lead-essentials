@@ -146,7 +146,6 @@ final class EssentialFeedCacheIntegrationTests: XCTestCase {
     }
     
     private func expect(_ sut: LocalFeedImageDataLoader, load expectedData: Data, for url: URL, file: StaticString = #file, line: UInt = #line) {
-
         do {
             let loadedData = try sut.loadImageData(from: url)
             XCTAssertEqual(loadedData, expectedData, file: file, line: line)
@@ -156,14 +155,11 @@ final class EssentialFeedCacheIntegrationTests: XCTestCase {
     }
         
     private func validateCache(with loader: LocalFeedLoader, file: StaticString = #file, line: UInt = #line) {
-        let exp = expectation(description: "Wait for save completion")
-        loader.validateCache() { result in
-            if case let Result.failure(error) = result {
-                XCTFail("Expected to validate feed successfully, got error: \(error)", file: file, line: line)
-            }
-            exp.fulfill()
+        do {
+            try loader.validateCache()
+        } catch {
+            XCTFail("Expected to validate feed successfully, got error: \(error)", file: file, line: line)
         }
-        wait(for: [exp], timeout: 1.0)
     }
     
     private var testStoreUrl: URL {

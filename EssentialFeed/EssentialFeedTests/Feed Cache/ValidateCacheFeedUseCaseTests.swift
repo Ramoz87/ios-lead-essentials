@@ -19,7 +19,7 @@ final class ValidateCacheFeedUseCaseTests: XCTestCase {
         let (sut, store) = makeSUT()
 
         store.completeRetrieve(with: anyNSError())
-        sut.validateCache { _ in }
+        try? sut.validateCache()
         
         XCTAssertEqual(store.commands, [.retrieve, .delete])
     }
@@ -28,7 +28,7 @@ final class ValidateCacheFeedUseCaseTests: XCTestCase {
         let (sut, store) = makeSUT()
         
         store.completeRetrieveWithEmptyCache()
-        sut.validateCache { _ in }
+        try? sut.validateCache()
         
         XCTAssertEqual(store.commands, [.retrieve])
     }
@@ -40,7 +40,7 @@ final class ValidateCacheFeedUseCaseTests: XCTestCase {
         let (sut, store) = makeSUT(currentDate: { fixedCurrentDate })
         
         store.completeRetrieve(with: feed.local, timestamp: lessThanCacheExpirationDate)
-        sut.validateCache { _ in }
+        try? sut.validateCache()
         
         XCTAssertEqual(store.commands, [.retrieve])
     }
@@ -52,7 +52,7 @@ final class ValidateCacheFeedUseCaseTests: XCTestCase {
         let (sut, store) = makeSUT(currentDate: { fixedCurrentDate })
         
         store.completeRetrieve(with: feed.local, timestamp: cacheExpirationDate)
-        sut.validateCache { _ in }
+        try? sut.validateCache()
         
         XCTAssertEqual(store.commands, [.retrieve, .delete])
     }
@@ -64,7 +64,7 @@ final class ValidateCacheFeedUseCaseTests: XCTestCase {
         let (sut, store) = makeSUT(currentDate: { fixedCurrentDate })
         
         store.completeRetrieve(with: feed.local, timestamp: cacheExpiredDate)
-        sut.validateCache { _ in }
+        try? sut.validateCache()
         
         XCTAssertEqual(store.commands, [.retrieve, .delete])
     }
@@ -142,25 +142,20 @@ final class ValidateCacheFeedUseCaseTests: XCTestCase {
         return (sut, store)
     }
     
-    private func expect(_ sut: LocalFeedLoader, completeWith expectedResult: LocalFeedLoader.ValidationResult, when action: () -> Void, file: StaticString = #file, line: UInt = #line) {
+    private func expect(_ sut: LocalFeedLoader, completeWith expectedResult: Result<Void, Error>, when action: () -> Void, file: StaticString = #file, line: UInt = #line) {
         
         action()
         
-        let exp = expectation(description: "Wait for load completion")
-        sut.validateCache { receivedResult in
-            switch (receivedResult, expectedResult) {
-            case (.success, .success):
-                break
-                
-            case let (.failure(receivedError as NSError), .failure(expectedError as NSError)):
-                XCTAssertEqual(receivedError, expectedError, file: file, line: line)
-                
-            default:
-                XCTFail("Expected result \(expectedResult), got \(receivedResult) instead", file: file, line: line)
-            }
+        let receivedResult = Result { try sut.validateCache() }
+        switch (receivedResult, expectedResult) {
+        case (.success, .success):
+            break
             
-            exp.fulfill()
+        case let (.failure(receivedError as NSError), .failure(expectedError as NSError)):
+            XCTAssertEqual(receivedError, expectedError, file: file, line: line)
+            
+        default:
+            XCTFail("Expected result \(expectedResult), got \(receivedResult) instead", file: file, line: line)
         }
-        wait(for: [exp], timeout: 1.0)
     }
 }
