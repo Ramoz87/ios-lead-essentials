@@ -10,21 +10,29 @@ import CoreData
 final public class CoreDataFeedStore {
     
     private let container: NSPersistentContainer
-    private let context: NSManagedObjectContext
+    let context: NSManagedObjectContext
     
     deinit {
         cleanUpReferencesToPersistentStores()
     }
     
-    public init(storeUrl: URL) throws {
-        let bundle = Bundle(for: CoreDataFeedStore.self)
-        container = try NSPersistentContainer.load(modelName: "FeedCache", url: storeUrl, in: bundle)
-        context = container.newBackgroundContext()
+    public enum ContextQueue {
+        case main
+        case background
     }
     
-    func perform(_ action: @escaping (NSManagedObjectContext) -> Void) {
-        let context = self.context
-        context.perform { action(context) }
+    public var contextQueue: ContextQueue {
+        context == container.viewContext ? .main : .background
+    }
+    
+    public init(storeUrl: URL, contextQueue: ContextQueue = .background) throws {
+        let bundle = Bundle(for: CoreDataFeedStore.self)
+        container = try NSPersistentContainer.load(modelName: "FeedCache", url: storeUrl, in: bundle)
+        context = contextQueue == .main ? container.viewContext : container.newBackgroundContext()
+    }
+    
+    public func perform(_ action: @escaping () -> Void) {
+        context.perform(action)
     }
     
     private func cleanUpReferencesToPersistentStores() {

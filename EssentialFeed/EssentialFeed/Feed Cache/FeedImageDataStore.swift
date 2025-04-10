@@ -8,9 +8,6 @@
 import Foundation
 
 public protocol FeedImageDataStore {
-    typealias RetrieveResult = Result<Data?, Error>
-    typealias InsertResult = Result<Void, Error>
-
-    func retrieve(dataForURL url: URL, completion: @escaping (RetrieveResult) -> Void)
-    func insert(_ data: Data, for url: URL, completion: @escaping (InsertResult) -> Void)
+    func retrieve(dataForURL url: URL) throws -> Data?
+    func insert(_ data: Data, for url: URL) throws
 }

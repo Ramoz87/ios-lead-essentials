@@ -19,6 +19,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private lazy var baseURL = URL(string: "https://ile-api.essentialdeveloper.com/essential-feed")!
     private lazy var logger = Logger(subsystem: "com.essentialdeveloper.EssentialApp", category: "main")
     
+    private lazy var scheduler: AnyDispatchQueueScheduler = {
+        if let store = store as? CoreDataFeedStore {
+            return .scheduler(for: store)
+        }
+        
+        return DispatchQueue(
+            label: "com.essentialdeveloper.queue",
+            qos: .userInitiated
+        ).eraseToAnyScheduler()
+    }()
+    
     private lazy var client: HTTPClient = {
         URLSessionHTTPClient(session: URLSession(configuration: .ephemeral))
     }()
@@ -32,12 +43,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         } catch {
             assertionFailure("Failed to instantiate CoreData store with error: \(error.localizedDescription)")
             logger.fault("Failed to instantiate CoreData store with error: \(error.localizedDescription)")
-            return NullStore()
+            return InMemoryFeedStore()
         }
     }()
     
     private lazy var localFeedLoader = LocalFeedLoader(store: store, date: Date.init)
-    private lazy var localImageLoader = LocalFeedImageDataLoader(store: store)
     
     private lazy var navigationController = {
         let controller = FeedUIComposer.feedViewController(
@@ -77,7 +87,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneWillResignActive(_ scene: UIScene) {
         // Called when the scene will move from an active state to an inactive state.
         // This may occur due to temporary interruptions (ex. an incoming phone call).
-        localFeedLoader.validateCache { _ in }
+        scheduler.schedule { [localFeedLoader, logger] in
+            do {
+                try localFeedLoader.validateCache()
+            } catch {
+                logger.error("Failed to validate cache with error: \(error.localizedDescription)")
+            }
+        }
     }
 
     func sceneWillEnterForeground(_ scene: UIScene) {
@@ -104,8 +120,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     private func makeRemoteFeedLoaderWithLocalFallback() -> Paginated<FeedImage>.Publisher {
         makeRemoteFeedLoader()
+            .receive(on: scheduler)
             .caching(to: localFeedLoader)
-            .fallback(to: localFeedLoader.loadPublisher())
+            .fallback(to: localFeedLoader.loadPublisher)
             .map { self.makePage(items: $0, last: $0.last) }
             .eraseToAnyPublisher()
     }
@@ -115,6 +132,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             .loadPublisher()
             .zip(makeRemoteFeedLoader(after: last))
             .map { self.makePage(items: $0 + $1, last: $1.last) }
+            .receive(on: scheduler)
             .caching(to: localFeedLoader)
     }
     
@@ -127,13 +145,19 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     
     private func makeLocalImageLoaderWithRemoteFallback(url: URL) -> FeedImageDataLoader.Publisher {
-        localImageLoader
+        let localImageLoader = LocalFeedImageDataLoader(store: store)
+        
+        return localImageLoader
             .loadPublisher(url: url)
-            .fallback(to: client
-                .getPublisher(url: url)
-                .tryMap(RemoteFeedImageDataMapper.map)
-                .caching(to: localImageLoader, using: url)
-            )
+            .fallback(to: { [client, scheduler] in
+                client
+                    .getPublisher(url: url)
+                    .tryMap(RemoteFeedImageDataMapper.map)
+                    .receive(on: scheduler)
+                    .caching(to: localImageLoader, using: url)
+            })
+            .subscribe(on: scheduler)
+            .eraseToAnyPublisher()
     }
     
     private func makeRemoteCommentsLoader(url: URL) -> () -> AnyPublisher<[ImageComment], Error> {
