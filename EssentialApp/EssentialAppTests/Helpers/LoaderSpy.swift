@@ -10,7 +10,7 @@ import Combine
 import EssentialFeed
 import EssentialFeediOS
 
-class LoaderSpy: FeedImageDataLoader {
+class LoaderSpy {
     
     private var feedRequests = [PassthroughSubject<Paginated<FeedImage>, Error>]()
     private var loadMoreRequests = [PassthroughSubject<Paginated<FeedImage>, Error>]()
@@ -58,29 +58,26 @@ class LoaderSpy: FeedImageDataLoader {
     
     //MARK: - FeedImageDataLoader
     
-    private var imageRequests = [(url: URL, completion: (FeedImageDataLoader.Result) -> Void)]()
+    private var imageRequests = [(url: URL, publisher: PassthroughSubject<Data, Error>)]()
     private(set) var cancelledImageURLs = [URL]()
     var loadedImageURLs: [URL] {
         return imageRequests.map { $0.url }
     }
     
-    func loadImageData(from url: URL, completion: @escaping (FeedImageDataLoader.Result) -> Void) -> FeedImageDataLoaderTask {
-        imageRequests.append((url, completion))
-        return TaskSpy { [weak self] in self?.cancelledImageURLs.append(url) }
+    func loadImageDataPublisher(from url: URL) -> AnyPublisher<Data, Error> {
+        let publisher = PassthroughSubject<Data, Error>()
+        imageRequests.append((url, publisher))
+        return publisher.handleEvents(receiveCancel: { [weak self] in
+            self?.cancelledImageURLs.append(url)
+        }).eraseToAnyPublisher()
     }
     
     func completeImageLoading(with imageData: Data = Data(), at index: Int = 0) {
-        imageRequests[index].completion(.success(imageData))
-    }
-
-    func completeImageLoadingWithError(at index: Int = 0) {
-        imageRequests[index].completion(.failure(anyNSError()))
+        imageRequests[index].publisher.send(imageData)
+        imageRequests[index].publisher.send(completion: .finished)
     }
     
-    private struct TaskSpy: FeedImageDataLoaderTask {
-        let cancelCallback: () -> Void
-        func cancel() {
-            cancelCallback()
-        }
+    func completeImageLoadingWithError(at index: Int = 0) {
+        imageRequests[index].publisher.send(completion: .failure(anyNSError()))
     }
 }
