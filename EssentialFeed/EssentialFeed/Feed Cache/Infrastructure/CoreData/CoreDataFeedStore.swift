@@ -21,6 +21,10 @@ final public class CoreDataFeedStore {
         case background
     }
     
+    public var contextQueue: ContextQueue {
+        context == container.viewContext ? .main : .background
+    }
+    
     public init(storeUrl: URL, contextQueue: ContextQueue = .background) throws {
         let bundle = Bundle(for: CoreDataFeedStore.self)
         container = try NSPersistentContainer.load(modelName: "FeedCache", url: storeUrl, in: bundle)
