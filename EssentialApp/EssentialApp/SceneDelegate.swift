@@ -83,10 +83,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneWillResignActive(_ scene: UIScene) {
         // Called when the scene will move from an active state to an inactive state.
         // This may occur due to temporary interruptions (ex. an incoming phone call).
-        do {
-            try localFeedLoader.validateCache()
-        } catch {
-            logger.error("Failed to validate cache with error: \(error.localizedDescription)")
+        scheduler.schedule { [localFeedLoader, logger] in
+            do {
+                try localFeedLoader.validateCache()
+            } catch {
+                logger.error("Failed to validate cache with error: \(error.localizedDescription)")
+            }
         }
     }
 
@@ -114,10 +116,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     private func makeRemoteFeedLoaderWithLocalFallback() -> Paginated<FeedImage>.Publisher {
         makeRemoteFeedLoader()
+            .receive(on: scheduler)
             .caching(to: localFeedLoader)
             .fallback(to: localFeedLoader.loadPublisher)
             .map { self.makePage(items: $0, last: $0.last) }
-            .subscribe(on: scheduler)
             .eraseToAnyPublisher()
     }
     
@@ -126,9 +128,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             .loadPublisher()
             .zip(makeRemoteFeedLoader(after: last))
             .map { self.makePage(items: $0 + $1, last: $1.last) }
+            .receive(on: scheduler)
             .caching(to: localFeedLoader)
-            .subscribe(on: scheduler)
-            .eraseToAnyPublisher()
     }
     
     private func makeRemoteFeedLoader(after: FeedImage? = nil) -> AnyPublisher<[FeedImage], Error> {
@@ -148,9 +149,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 client
                     .getPublisher(url: url)
                     .tryMap(RemoteFeedImageDataMapper.map)
+                    .receive(on: scheduler)
                     .caching(to: localImageLoader, using: url)
-                    .subscribe(on: scheduler)
-                    .eraseToAnyPublisher()
             })
             .subscribe(on: scheduler)
             .eraseToAnyPublisher()
