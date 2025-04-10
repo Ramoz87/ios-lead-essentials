@@ -19,6 +19,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private lazy var baseURL = URL(string: "https://ile-api.essentialdeveloper.com/essential-feed")!
     private lazy var logger = Logger(subsystem: "com.essentialdeveloper.EssentialApp", category: "main")
     
+    private lazy var scheduler: AnyDispatchQueueScheduler = DispatchQueue (
+        label: "com.essentialdeveloper.queue",
+        qos: .userInitiated,
+        attributes: .concurrent
+    ).eraseToAnyScheduler()
+    
     private lazy var client: HTTPClient = {
         URLSessionHTTPClient(session: URLSession(configuration: .ephemeral))
     }()
@@ -37,7 +43,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }()
     
     private lazy var localFeedLoader = LocalFeedLoader(store: store, date: Date.init)
-    private lazy var localImageLoader = LocalFeedImageDataLoader(store: store)
     
     private lazy var navigationController = {
         let controller = FeedUIComposer.feedViewController(
@@ -47,10 +52,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         return UINavigationController(rootViewController: controller)
     }()
 
-    convenience init(httpClient: HTTPClient, store: FeedStore & FeedImageDataStore) {
+    convenience init(httpClient: HTTPClient, store: FeedStore & FeedImageDataStore, scheduler: AnyDispatchQueueScheduler) {
         self.init()
         self.client = httpClient
         self.store = store
+        self.scheduler = scheduler
     }
    
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
@@ -105,7 +111,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private func makeRemoteFeedLoaderWithLocalFallback() -> Paginated<FeedImage>.Publisher {
         makeRemoteFeedLoader()
             .caching(to: localFeedLoader)
-            .fallback(to: localFeedLoader.loadPublisher())
+            .fallback(to: localFeedLoader.loadPublisher)
             .map { self.makePage(items: $0, last: $0.last) }
             .eraseToAnyPublisher()
     }
@@ -127,13 +133,20 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     
     private func makeLocalImageLoaderWithRemoteFallback(url: URL) -> FeedImageDataLoader.Publisher {
-        localImageLoader
+        let localImageLoader = LocalFeedImageDataLoader(store: store)
+        
+        return localImageLoader
             .loadPublisher(url: url)
-            .fallback(to: client
-                .getPublisher(url: url)
-                .tryMap(RemoteFeedImageDataMapper.map)
-                .caching(to: localImageLoader, using: url)
-            )
+            .fallback(to: { [client, scheduler] in
+                client
+                    .getPublisher(url: url)
+                    .tryMap(RemoteFeedImageDataMapper.map)
+                    .caching(to: localImageLoader, using: url)
+                    .subscribe(on: scheduler)
+                    .eraseToAnyPublisher()
+            })
+            .subscribe(on: scheduler)
+            .eraseToAnyPublisher()
     }
     
     private func makeRemoteCommentsLoader(url: URL) -> () -> AnyPublisher<[ImageComment], Error> {

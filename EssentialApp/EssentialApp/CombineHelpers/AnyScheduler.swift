@@ -46,3 +46,11 @@ struct AnyScheduler<SchedulerTimeType: Strideable, SchedulerOptions>: Scheduler 
         _scheduleAfterInterval(date, interval, tolerance, options, action)
     }
 }
+
+typealias AnyDispatchQueueScheduler = AnyScheduler<DispatchQueue.SchedulerTimeType, DispatchQueue.SchedulerOptions>
+
+extension AnyDispatchQueueScheduler {
+    static var immediateOnMainQueue: Self {
+        DispatchQueue.immediateWhenOnMainQueueScheduler.eraseToAnyScheduler()
+    }
+}

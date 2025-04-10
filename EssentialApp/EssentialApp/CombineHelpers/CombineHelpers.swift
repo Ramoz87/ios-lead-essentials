@@ -9,8 +9,8 @@ import Foundation
 import EssentialFeed
 
 extension Publisher {
-    func fallback(to fallbackPublisher: AnyPublisher<Output, Failure>) -> AnyPublisher<Output, Failure> {
-        self.catch { _ in fallbackPublisher }.eraseToAnyPublisher()
+    func fallback(to fallbackPublisher: @escaping () -> AnyPublisher<Output, Failure>) -> AnyPublisher<Output, Failure> {
+        self.catch { _ in fallbackPublisher() }.eraseToAnyPublisher()
     }
 }
 
