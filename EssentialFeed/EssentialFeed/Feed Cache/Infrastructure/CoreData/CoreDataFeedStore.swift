@@ -16,10 +16,15 @@ final public class CoreDataFeedStore {
         cleanUpReferencesToPersistentStores()
     }
     
-    public init(storeUrl: URL) throws {
+    public enum ContextQueue {
+        case main
+        case background
+    }
+    
+    public init(storeUrl: URL, contextQueue: ContextQueue = .background) throws {
         let bundle = Bundle(for: CoreDataFeedStore.self)
         container = try NSPersistentContainer.load(modelName: "FeedCache", url: storeUrl, in: bundle)
-        context = container.newBackgroundContext()
+        context = contextQueue == .main ? container.viewContext : container.newBackgroundContext()
     }
     
     func performSync<R>(_ action: (NSManagedObjectContext) -> Result<R, Error>) throws -> R {
