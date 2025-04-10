@@ -18,8 +18,8 @@ final class ValidateCacheFeedUseCaseTests: XCTestCase {
     func test_validate_errorOnRetrieve_deleteCache() {
         let (sut, store) = makeSUT()
 
-        sut.validateCache { _ in }
         store.completeRetrieve(with: anyNSError())
+        sut.validateCache { _ in }
         
         XCTAssertEqual(store.commands, [.retrieve, .delete])
     }
@@ -27,8 +27,8 @@ final class ValidateCacheFeedUseCaseTests: XCTestCase {
     func test_validate_emptyCache_doesNotDeleteCache() {
         let (sut, store) = makeSUT()
         
-        sut.validateCache { _ in }
         store.completeRetrieveWithEmptyCache()
+        sut.validateCache { _ in }
         
         XCTAssertEqual(store.commands, [.retrieve])
     }
@@ -39,8 +39,8 @@ final class ValidateCacheFeedUseCaseTests: XCTestCase {
         let lessThanCacheExpirationDate = fixedCurrentDate.maxFeedCacheAge().adding(seconds: 1)
         let (sut, store) = makeSUT(currentDate: { fixedCurrentDate })
         
-        sut.validateCache { _ in }
         store.completeRetrieve(with: feed.local, timestamp: lessThanCacheExpirationDate)
+        sut.validateCache { _ in }
         
         XCTAssertEqual(store.commands, [.retrieve])
     }
@@ -51,8 +51,8 @@ final class ValidateCacheFeedUseCaseTests: XCTestCase {
         let cacheExpirationDate = fixedCurrentDate.maxFeedCacheAge()
         let (sut, store) = makeSUT(currentDate: { fixedCurrentDate })
         
-        sut.validateCache { _ in }
         store.completeRetrieve(with: feed.local, timestamp: cacheExpirationDate)
+        sut.validateCache { _ in }
         
         XCTAssertEqual(store.commands, [.retrieve, .delete])
     }
@@ -63,21 +63,10 @@ final class ValidateCacheFeedUseCaseTests: XCTestCase {
         let cacheExpiredDate = fixedCurrentDate.maxFeedCacheAge().adding(seconds: -1)
         let (sut, store) = makeSUT(currentDate: { fixedCurrentDate })
         
-        sut.validateCache { _ in }
         store.completeRetrieve(with: feed.local, timestamp: cacheExpiredDate)
+        sut.validateCache { _ in }
         
         XCTAssertEqual(store.commands, [.retrieve, .delete])
-    }
-    
-    func test_validate_deallocatedBeforeCompletion_doesNotDeleteCache() {
-        let store = FeedStoreSpy()
-        var sut: LocalFeedLoader? = LocalFeedLoader(store: store, date: Date.init)
-        
-        sut?.validateCache { _ in }
-        sut = nil
-        store.completeRetrieve(with: anyNSError())
-        
-        XCTAssertEqual(store.commands, [.retrieve])
     }
     
     func test_validate_failsOnDeletionErrorOfFailedRetrieval() {
@@ -154,24 +143,24 @@ final class ValidateCacheFeedUseCaseTests: XCTestCase {
     }
     
     private func expect(_ sut: LocalFeedLoader, completeWith expectedResult: LocalFeedLoader.ValidationResult, when action: () -> Void, file: StaticString = #file, line: UInt = #line) {
-            let exp = expectation(description: "Wait for load completion")
-
-            sut.validateCache { receivedResult in
-                switch (receivedResult, expectedResult) {
-                case (.success, .success):
-                    break
-
-                case let (.failure(receivedError as NSError), .failure(expectedError as NSError)):
-                    XCTAssertEqual(receivedError, expectedError, file: file, line: line)
-
-                default:
-                    XCTFail("Expected result \(expectedResult), got \(receivedResult) instead", file: file, line: line)
-                }
-
-                exp.fulfill()
+        
+        action()
+        
+        let exp = expectation(description: "Wait for load completion")
+        sut.validateCache { receivedResult in
+            switch (receivedResult, expectedResult) {
+            case (.success, .success):
+                break
+                
+            case let (.failure(receivedError as NSError), .failure(expectedError as NSError)):
+                XCTAssertEqual(receivedError, expectedError, file: file, line: line)
+                
+            default:
+                XCTFail("Expected result \(expectedResult), got \(receivedResult) instead", file: file, line: line)
             }
-
-            action()
-            wait(for: [exp], timeout: 1.0)
+            
+            exp.fulfill()
         }
+        wait(for: [exp], timeout: 1.0)
+    }
 }

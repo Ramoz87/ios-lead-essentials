@@ -17,50 +17,50 @@ class FeedStoreSpy: FeedStore {
     }
     
     private(set) var commands = [ReceivedMessage]()
-    private var deleteCompletions = [DeleteCompletion]()
-    private var insertCompletions = [InsertCompletion]()
-    private var retrieveCompletions = [RetrieveCompletion]()
+    private var deletionResult: Result<Void, Error>?
+    private var insertionResult: Result<Void, Error>?
+    private var retrievalResult: Result<CachedFeed?, Error>?
     
-    func deleteCachedFeed(completion: @escaping DeleteCompletion) {
-        deleteCompletions.append(completion)
+    func deleteCachedFeed() throws {
         commands.append(.delete)
+        try deletionResult?.get()
     }
     
     func completeDelete(with error: Error?) {
-        var result: DeleteResult = .success(())
         if let error {
-            result = .failure(error)
+            deletionResult = .failure(error)
+        } else {
+            deletionResult = .success(())
         }
-        deleteCompletions.last?(result)
     }
     
-    func insert(_ items: [LocalFeedImage], timestamp: Date, completion: @escaping InsertCompletion) {
-        insertCompletions.append(completion)
+    func insert(_ items: [LocalFeedImage], timestamp: Date) throws {
         commands.append(.insert(items, timestamp))
+        try insertionResult?.get()
     }
     
     func completeInsert(with error: Error?) {
-        var result: InsertResult = .success(())
         if let error {
-            result = .failure(error)
+            insertionResult = .failure(error)
+        } else {
+            insertionResult = .success(())
         }
-        insertCompletions.last?(result)
     }
     
-    func retrieve(completion: @escaping RetrieveCompletion) {
-        retrieveCompletions.append(completion)
+    func retrieve() throws -> CachedFeed? {
         commands.append(.retrieve)
+        return try retrievalResult?.get()
     }
     
     func completeRetrieve(with error: Error) {
-        retrieveCompletions.last?(.failure(error))
+        retrievalResult = .failure(error)
     }
     
     func completeRetrieveWithEmptyCache() {
-        retrieveCompletions.last?(.success(nil))
+        retrievalResult = .success(nil)
     }
     
     func completeRetrieve(with feed: [LocalFeedImage], timestamp: Date) {
-        retrieveCompletions.last?(.success(CachedFeed(feed: feed, timestamp: timestamp)))
+        retrievalResult = .success(CachedFeed(feed: feed, timestamp: timestamp))
     }
 }
