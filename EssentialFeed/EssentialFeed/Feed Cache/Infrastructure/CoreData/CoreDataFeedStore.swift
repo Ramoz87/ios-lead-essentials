@@ -8,12 +8,19 @@
 import CoreData
 
 final public class CoreDataFeedStore {
+    private static let modelName = "FeedCache"
+    private static let model = NSManagedObjectModel.with(name: modelName, in: Bundle(for: CoreDataFeedStore.self))
     
     private let container: NSPersistentContainer
     let context: NSManagedObjectContext
     
     deinit {
         cleanUpReferencesToPersistentStores()
+    }
+    
+    enum StoreError: Error {
+        case modelNotFound
+        case failedToLoadPersistentContainer(Error)
     }
     
     public enum ContextQueue {
@@ -26,8 +33,11 @@ final public class CoreDataFeedStore {
     }
     
     public init(storeUrl: URL, contextQueue: ContextQueue = .background) throws {
-        let bundle = Bundle(for: CoreDataFeedStore.self)
-        container = try NSPersistentContainer.load(modelName: "FeedCache", url: storeUrl, in: bundle)
+        guard let model = CoreDataFeedStore.model else {
+            throw StoreError.modelNotFound
+        }
+        
+        container = try NSPersistentContainer.load(modelName: CoreDataFeedStore.modelName, model: model, url: storeUrl)
         context = contextQueue == .main ? container.viewContext : container.newBackgroundContext()
     }
     
