@@ -10,6 +10,7 @@ import Combine
 import EssentialFeed
 import EssentialFeediOS
 
+@MainActor
 class LoaderSpy {
     
     private var feedRequests = [PassthroughSubject<Paginated<FeedImage>, Error>]()

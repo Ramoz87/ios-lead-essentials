@@ -17,7 +17,8 @@ public extension HTTPClient {
         
         return Deferred {
             Future { completion in
-                task = get(from: url, completion: completion)
+                nonisolated(unsafe) let uncheckedCompletion = completion
+                task = get(from: url, completion: { uncheckedCompletion($0) })
             }
         }
         .handleEvents(receiveCancel: { task?.cancel() })

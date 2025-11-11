@@ -10,15 +10,16 @@ import Combine
 import EssentialFeed
 import EssentialFeediOS
 
+@MainActor
 public final class FeedUIComposer {
     private init() {}
     
     private typealias FeedPresentationAdapter = LoadResourcePresenterAdapter<Paginated<FeedImage>, FeedViewAdapter>
     
     public static func feedViewController(
-        feedLoader: @escaping () -> AnyPublisher<Paginated<FeedImage>, Error>,
-        imageLoader: @escaping (URL) -> FeedImageDataLoader.Publisher,
-        selection: @escaping (FeedImage) -> Void = { _ in }
+        feedLoader: @MainActor @escaping () -> AnyPublisher<Paginated<FeedImage>, Error>,
+        imageLoader: @MainActor @escaping (URL) -> FeedImageDataLoader.Publisher,
+        selection: @MainActor @escaping (FeedImage) -> Void = { _ in }
     ) -> ListViewController {
         let presenterAdapter = FeedPresentationAdapter(loader: feedLoader)
         let feedController = makeListViewController(title: FeedPresenter.title)

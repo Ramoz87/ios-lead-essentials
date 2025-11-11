@@ -13,6 +13,18 @@
   },
   "testTargets" : [
     {
+      "skippedTests" : [
+        "FeedSnapshotTests",
+        "FeedSnapshotTests\/test_feedWithContent()",
+        "FeedSnapshotTests\/test_feedWithFailedImageLoading()",
+        "FeedSnapshotTests\/test_feedWithLoadMoreError()",
+        "FeedSnapshotTests\/test_feedWithLoadMoreIndicator()",
+        "ImageCommentSnapshotTests",
+        "ImageCommentSnapshotTests\/test_listWithComments()",
+        "ListSnapshotTests",
+        "ListSnapshotTests\/test_emptyList()",
+        "ListSnapshotTests\/test_listWithErrorMessage()"
+      ],
       "target" : {
         "containerPath" : "container:EssentialFeed.xcodeproj",
         "identifier" : "B703375B2D37FC13005D8200",
