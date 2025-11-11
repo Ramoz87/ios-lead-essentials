@@ -9,6 +9,7 @@ import EssentialFeed
 import EssentialFeediOS
 @testable import EssentialApp
 
+@MainActor 
 final class FeedAcceptanceTests: XCTestCase {
     
     func test_onLaunch_displaysRemoteFeedWhenCustomerHasConnectivity() throws {
@@ -178,6 +179,7 @@ final class FeedAcceptanceTests: XCTestCase {
     }
 }
 
+@MainActor
 extension CoreDataFeedStore {
     static var empty: CoreDataFeedStore {
         get throws {

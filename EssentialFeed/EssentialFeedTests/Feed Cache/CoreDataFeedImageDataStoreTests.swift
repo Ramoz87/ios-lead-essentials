@@ -8,35 +8,36 @@
 import XCTest
 import EssentialFeed
 
+@MainActor
 class CoreDataFeedImageDataStoreTests: XCTestCase, FeedImageDataStoreSpecs{
     
     func test_retrieveImageData_deliversNotFoundWhenEmpty() throws {
         try makeSUT { sut, url in
-            self.assertThatRetrieveImageDataDeliversNotFoundOnEmptyCache(on: sut, imageDataURL: url)
+            assertThatRetrieveImageDataDeliversNotFoundOnEmptyCache(on: sut, imageDataURL: url)
         }
     }
     
     func test_retrieveImageData_deliversNotFoundWhenStoredDataURLDoesNotMatch() throws {
         try makeSUT { sut, url in
-            self.assertThatRetrieveImageDataDeliversNotFoundWhenStoredDataURLDoesNotMatch(on: sut, imageDataURL: url)
+            assertThatRetrieveImageDataDeliversNotFoundWhenStoredDataURLDoesNotMatch(on: sut, imageDataURL: url)
         }
     }
     
     func test_retrieveImageData_deliversFoundDataWhenThereIsAStoredImageDataMatchingURL() throws {
         try makeSUT { sut, imageDataURL in
-            self.assertThatRetrieveImageDataDeliversFoundDataWhenThereIsAStoredImageDataMatchingURL(on: sut, imageDataURL: imageDataURL)
+            assertThatRetrieveImageDataDeliversFoundDataWhenThereIsAStoredImageDataMatchingURL(on: sut, imageDataURL: imageDataURL)
         }
     }
     
     func test_retrieveImageData_deliversLastInsertedValue() throws {
         try makeSUT { sut, imageDataURL in
-            self.assertThatRetrieveImageDataDeliversLastInsertedValueForURL(on: sut, imageDataURL: imageDataURL)
+            assertThatRetrieveImageDataDeliversLastInsertedValueForURL(on: sut, imageDataURL: imageDataURL)
         }
     }
     
     // - MARK: Private
     
-    private func makeSUT(_ test: @escaping (CoreDataFeedStore, URL) -> Void, file: StaticString = #file, line: UInt = #line) throws {
+    private func makeSUT(_ test: @Sendable @escaping (CoreDataFeedStore, URL) -> Void, file: StaticString = #file, line: UInt = #line) throws {
         let storeURL = URL(fileURLWithPath: "/dev/null")
         let sut = try CoreDataFeedStore(storeUrl: storeURL)
         trackMemoryLeaks(sut, file: file, line: line)

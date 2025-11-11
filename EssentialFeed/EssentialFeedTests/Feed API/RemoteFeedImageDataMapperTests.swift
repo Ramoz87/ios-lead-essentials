@@ -8,6 +8,7 @@
 import XCTest
 import EssentialFeed
 
+@MainActor 
 class LoadFeedImageDataFromRemoteUseCaseTests: XCTestCase {
     
     func test_map_throwsErrorOnNon200HTTPResponse() throws {

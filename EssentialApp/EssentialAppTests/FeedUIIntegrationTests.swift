@@ -10,6 +10,7 @@ import EssentialFeed
 import EssentialFeediOS
 import EssentialApp
 
+@MainActor 
 class FeedUIIntegrationTests: XCTestCase {
 
     func test_feed_hasTitle() {
