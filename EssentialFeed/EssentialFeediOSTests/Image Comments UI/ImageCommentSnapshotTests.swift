@@ -8,8 +8,9 @@ import XCTest
 import EssentialFeediOS
 @testable import EssentialFeed
 
+@MainActor
 final class ImageCommentSnapshotTests: XCTestCase {
-    
+        
     func test_listWithComments() {
         let sut = makeSUT()
         

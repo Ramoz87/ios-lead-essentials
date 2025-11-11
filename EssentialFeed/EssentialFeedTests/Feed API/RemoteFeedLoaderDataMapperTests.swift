@@ -8,6 +8,7 @@
 import XCTest
 import EssentialFeed
 
+@MainActor
 final class RemoteFeedLoaderDataMapperTests: XCTestCase {
     
     func test_map_throwsErrorOnNon200HTTPCode() throws {

@@ -8,11 +8,12 @@
 import XCTest
 import EssentialFeed
 
+@MainActor 
 final class EssentialFeedAPIEndToEndTests: XCTestCase {
 
-    func test_GETFeed_matchesFixedTestAccountData() {
+    func test_GETFeed_matchesFixedTestAccountData() async {
         
-        guard let result = getFeedResult() else {
+        guard let result = await getFeedResult() else {
             XCTFail("Expected feed result, got no result instead")
             return
         }
@@ -34,9 +35,9 @@ final class EssentialFeedAPIEndToEndTests: XCTestCase {
         }
     }
     
-    func test_endToEndTestServerGETFeedImageDataResult_matchesFixedTestAccountData() {
+    func test_endToEndTestServerGETFeedImageDataResult_matchesFixedTestAccountData() async  {
         
-        guard let result = getFeedImageDataResult() else {
+        guard let result = await getFeedImageDataResult() else {
             XCTFail("Expected image data result, got no result instead")
             return
         }
@@ -52,48 +53,35 @@ final class EssentialFeedAPIEndToEndTests: XCTestCase {
     
     // MARK: - Helpers
     
-    private func getFeedResult(file: StaticString = #file, line: UInt = #line) -> Swift.Result<[FeedImage], Error>? {
-       
+    private func getFeedResult(file: StaticString = #file, line: UInt = #line) async -> Swift.Result<[FeedImage], Error>? {
         let client = ephemeralClient()
-        let exp = expectation(description: "Wait for completion")
-        
-        var receivedResult: Swift.Result<[FeedImage], Error>?
-        client.get(from: feedTestServerURL) { result in
-            receivedResult = result.flatMap { (data, response) in
-                do {
-                    return .success(try RemoteFeedLoaderDataMapper.map(data, response))
-                } catch {
-                    return .failure(error)
-                }
+        return await withCheckedContinuation { continuation in
+            client.get(from: feedTestServerURL) { result in
+                continuation.resume(returning: result.flatMap { (data, response) in
+                    do {
+                        return .success(try RemoteFeedLoaderDataMapper.map(data, response))
+                    } catch {
+                        return .failure(error)
+                    }
+                })
             }
-            exp.fulfill()
         }
-        wait(for: [exp], timeout: 5.0)
-        
-        return receivedResult
     }
     
-    private func getFeedImageDataResult(file: StaticString = #file, line: UInt = #line) -> Result<Data, Error>? {
-        let url = feedTestServerURL.appendingPathComponent("73A7F70C-75DA-4C2E-B5A3-EED40DC53AA6/image")
+    private func getFeedImageDataResult(file: StaticString = #file, line: UInt = #line) async -> Result<Data, Error>? {
         let client = ephemeralClient()
-        let exp = expectation(description: "Wait for completion")
-        
-        var receivedResult: Result<Data, Error>?
-        
-        client.get(from: url) { result in
-            receivedResult = result.flatMap({ (data, response) in
-                do {
-                    return .success(try RemoteFeedImageDataMapper.map(data, from: response))
-                } catch {
-                    return .failure(error)
-                }
-            })
-            exp.fulfill()
+        let url = feedTestServerURL.appendingPathComponent("73A7F70C-75DA-4C2E-B5A3-EED40DC53AA6/image")
+        return await withCheckedContinuation { continuation in
+            client.get(from: url) { result in
+                continuation.resume(returning: result.flatMap({ (data, response) in
+                    do {
+                        return .success(try RemoteFeedImageDataMapper.map(data, from: response))
+                    } catch {
+                        return .failure(error)
+                    }
+                }))
+            }
         }
-        
-        wait(for: [exp], timeout: 5.0)
-        
-        return receivedResult
     }
     
     private var feedTestServerURL: URL {

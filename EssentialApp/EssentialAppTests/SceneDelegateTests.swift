@@ -8,6 +8,7 @@ import XCTest
 import EssentialFeediOS
 @testable import EssentialApp
 
+@MainActor 
 final class SceneDelegateTests: XCTestCase {
     
     func test_configureWindow_setsWindowAsKeyAndVisible() {

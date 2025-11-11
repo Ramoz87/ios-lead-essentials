@@ -10,6 +10,7 @@ import Combine
 import EssentialFeed
 import EssentialFeediOS
 
+@MainActor
 public final class CommentsUIComposer {
     private init() {}
     

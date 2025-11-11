@@ -7,6 +7,7 @@
 import XCTest
 import EssentialFeed
 
+@MainActor
 final class ImageCommentsMapperTests: XCTestCase {
 
     func test_map_throwErrorOnNon2xxHTTPCode() throws {

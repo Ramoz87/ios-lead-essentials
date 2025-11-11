@@ -83,7 +83,8 @@ extension AnyDispatchQueueScheduler {
             if store.contextQueue == .main, Thread.isMainThread {
                 action()
             } else {
-                store.perform(action)
+                nonisolated(unsafe) let uncheckedAction = action
+                store.perform { uncheckedAction() }
             }
         }
     }

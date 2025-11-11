@@ -10,6 +10,7 @@ import Combine
 import EssentialFeed
 import EssentialFeediOS
 
+@MainActor
 final class LoadResourcePresenterAdapter<Resource, View: ResourceView> {
 
     private let loader: () -> AnyPublisher<Resource, Error>

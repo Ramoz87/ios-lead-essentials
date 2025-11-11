@@ -7,8 +7,9 @@
 
 import CoreData
 
-final public class CoreDataFeedStore {
+final public class CoreDataFeedStore: Sendable {
     private static let modelName = "FeedCache"
+    @MainActor
     private static let model = NSManagedObjectModel.with(name: modelName, in: Bundle(for: CoreDataFeedStore.self))
     
     private let container: NSPersistentContainer
@@ -32,16 +33,21 @@ final public class CoreDataFeedStore {
         context == container.viewContext ? .main : .background
     }
     
-    public init(storeUrl: URL, contextQueue: ContextQueue = .background) throws {
+    @MainActor
+    public convenience init(storeUrl: URL, contextQueue: ContextQueue = .background) throws {
         guard let model = CoreDataFeedStore.model else {
             throw StoreError.modelNotFound
         }
         
+        try self.init(storeUrl: storeUrl, contextQueue: contextQueue, model: model)
+    }
+    
+    public init(storeUrl: URL, contextQueue: ContextQueue = .background, model: NSManagedObjectModel) throws {
         container = try NSPersistentContainer.load(modelName: CoreDataFeedStore.modelName, model: model, url: storeUrl)
         context = contextQueue == .main ? container.viewContext : container.newBackgroundContext()
     }
     
-    public func perform(_ action: @escaping () -> Void) {
+    public func perform(_ action: @Sendable @escaping () -> Void) {
         context.perform(action)
     }
     
