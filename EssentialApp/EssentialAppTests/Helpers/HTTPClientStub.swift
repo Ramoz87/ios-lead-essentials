@@ -32,4 +32,8 @@ class HTTPClientStub: HTTPClient {
         completion(stub(url))
         return Task()
     }
+    
+    func get(from url: URL) async throws -> (Data, HTTPURLResponse) {
+        return try stub(url).get()
+    }
 }
