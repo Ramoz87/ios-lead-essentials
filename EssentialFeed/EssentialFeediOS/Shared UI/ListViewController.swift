@@ -11,7 +11,7 @@ import EssentialFeed
 public class ListViewController: UITableViewController, UITableViewDataSourcePrefetching, ResourceLoadingView, ResourceErrorView {
     private(set) public var errorView = ErrorView()
     
-    private var onViewIsAppearing: (() -> Void)?
+    private var onViewDidAppear: ((ListViewController) -> Void)?
     public var onRefresh: (() -> Void)?
     
     private lazy var dataSource: UITableViewDiffableDataSource<Int, CellController> = {
@@ -27,16 +27,17 @@ public class ListViewController: UITableViewController, UITableViewDataSourcePre
         
     public override func viewDidLoad() {
         configureTableView()
+        configureTraitCollectionObservers()
         
-        onViewIsAppearing = { [weak self] in
-            self?.refresh()
-            self?.onViewIsAppearing = nil
+        onViewDidAppear = { vc in
+            vc.onViewDidAppear = nil
+            vc.refresh()
         }
     }
     
-    public override func viewIsAppearing(_ animated: Bool) {
-        super.viewIsAppearing(animated)
-        onViewIsAppearing?()
+    public override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        onViewDidAppear?(self)
     }
     
     @IBAction func refresh() {
@@ -57,11 +58,8 @@ public class ListViewController: UITableViewController, UITableViewDataSourcePre
             snapshot.appendSections([section])
             snapshot.appendItems(controllers, toSection: section)
         }
-        if #available(iOS 15.0, *) {
-          dataSource.applySnapshotUsingReloadData(snapshot)
-        } else {
-          dataSource.apply(snapshot)
-        }
+
+        dataSource.apply(snapshot)
     }
     
     public override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -98,6 +96,14 @@ public class ListViewController: UITableViewController, UITableViewDataSourcePre
             self?.tableView.beginUpdates()
             self?.tableView.sizeTableHeaderToFit()
             self?.tableView.endUpdates()
+        }
+    }
+    
+    private func configureTraitCollectionObservers() {
+        registerForTraitChanges(
+            [UITraitPreferredContentSizeCategory.self]
+        ) { (self: Self, previous: UITraitCollection) in
+            self.tableView.reloadData()
         }
     }
 }

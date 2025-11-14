@@ -28,6 +28,15 @@ extension ListViewController {
         return errorView.message
     }
     
+    private func prepareForFirstAppearance() {
+        setSmallFrameToPreventRenderingCells()
+        replaceRefreshControlWithFakeForiOS17()
+    }
+    
+    private func setSmallFrameToPreventRenderingCells() {
+        tableView.frame = CGRect(x: 0, y: 0, width: 390, height: 1)
+    }
+    
     func replaceRefreshControlWithFakeForiOS17() {
         let fakeRefreshControl = FakeRefreshControl()
         refreshControl?.allTargets.forEach { target in
@@ -41,7 +50,7 @@ extension ListViewController {
     func simulateAppearance() {
         if !isViewLoaded {
             loadViewIfNeeded()
-            replaceRefreshControlWithFakeForiOS17()
+            prepareForFirstAppearance()
         }
         beginAppearanceTransition(true, animated: false)
         endAppearanceTransition()

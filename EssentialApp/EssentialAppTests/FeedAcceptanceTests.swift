@@ -40,14 +40,14 @@ final class FeedAcceptanceTests: XCTestCase {
     func test_onLaunch_displaysCachedRemoteFeedWhenCustomerHasNoConnectivity() throws {
         let store = try CoreDataFeedStore.empty
         
-        let onlineFeed = launch(httpClient: .online(successResult), store: store)
+        let onlineFeed = try launch(httpClient: .online(successResult), store: store)
         onlineFeed.simulateFeedImageViewVisible(at: 0)
         onlineFeed.simulateFeedImageViewVisible(at: 1)
         
         onlineFeed.simulateLoadMoreFeedAction()
         onlineFeed.simulateFeedImageViewVisible(at: 2)
         
-        let offlineFeed = launch(httpClient: .offline, store: store)
+        let offlineFeed = try launch(httpClient: .offline, store: store)
         
         XCTAssertEqual(offlineFeed.numberOfRenderedFeedImageViews(), 3)
         XCTAssertEqual(offlineFeed.renderedFeedImageData(at: 0), makeImageData(at: 0))
@@ -88,9 +88,11 @@ final class FeedAcceptanceTests: XCTestCase {
     private func launch(
         httpClient: HTTPClientStub = .offline,
         store: CoreDataFeedStore
-    ) -> ListViewController {
+    ) throws -> ListViewController {
         let sut = SceneDelegate(httpClient: httpClient, store: store)
-        sut.window = UIWindow()
+        let dummyScene = try XCTUnwrap((UIWindowScene.self as NSObject.Type).init() as? UIWindowScene)
+        sut.window = UIWindow(windowScene: dummyScene)
+        sut.window?.frame = CGRect(x: 0, y: 0, width: 390, height: 1)
         sut.configureWindow()
         
         let nav = sut.window?.rootViewController as? UINavigationController
@@ -110,7 +112,7 @@ final class FeedAcceptanceTests: XCTestCase {
         let feed = try launch(httpClient: .online(successResult), store: .empty)
         
         feed.simulateTapOnFeedImage(at: 0)
-        RunLoop.current.run(until: Date() + 1)
+        RunLoop.current.run(until: Date())
         
         let ctrl = feed.navigationController?.topViewController as! ListViewController
         ctrl.simulateAppearance()
