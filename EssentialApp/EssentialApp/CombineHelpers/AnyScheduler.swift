@@ -59,6 +59,7 @@ extension AnyDispatchQueueScheduler {
         CoreDataFeedStoreScheduler(store: store).eraseToAnyScheduler()
     }
     
+    @MainActor
     private struct CoreDataFeedStoreScheduler: Scheduler {
         let store: CoreDataFeedStore
         
@@ -84,7 +85,10 @@ extension AnyDispatchQueueScheduler {
                 action()
             } else {
                 nonisolated(unsafe) let uncheckedAction = action
-                store.perform { uncheckedAction() }
+                Task.immediate {
+                    await store.perform { uncheckedAction() }
+                }
+                
             }
         }
     }
