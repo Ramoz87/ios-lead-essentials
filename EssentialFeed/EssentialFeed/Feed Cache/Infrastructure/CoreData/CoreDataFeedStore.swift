@@ -47,8 +47,13 @@ final public class CoreDataFeedStore: Sendable {
         context = contextQueue == .main ? container.viewContext : container.newBackgroundContext()
     }
     
+    @available(*, deprecated, message: "Use async version instead")
     public func perform(_ action: @Sendable @escaping () -> Void) {
         context.perform(action)
+    }
+    
+    public func perform<T>(_ block: @escaping @Sendable () throws -> T) async rethrows -> T {
+        try await context.perform(block)
     }
     
     private func cleanUpReferencesToPersistentStores() {

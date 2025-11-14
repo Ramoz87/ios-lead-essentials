@@ -11,45 +11,42 @@ import EssentialFeed
 @MainActor
 class CoreDataFeedImageDataStoreTests: XCTestCase, FeedImageDataStoreSpecs{
     
-    func test_retrieveImageData_deliversNotFoundWhenEmpty() throws {
-        try makeSUT { sut, url in
+    func test_retrieveImageData_deliversNotFoundWhenEmpty() async throws {
+        try await makeSUT { sut, url in
             assertThatRetrieveImageDataDeliversNotFoundOnEmptyCache(on: sut, imageDataURL: url)
         }
     }
     
-    func test_retrieveImageData_deliversNotFoundWhenStoredDataURLDoesNotMatch() throws {
-        try makeSUT { sut, url in
+    func test_retrieveImageData_deliversNotFoundWhenStoredDataURLDoesNotMatch() async throws {
+        try await makeSUT { sut, url in
             assertThatRetrieveImageDataDeliversNotFoundWhenStoredDataURLDoesNotMatch(on: sut, imageDataURL: url)
         }
     }
     
-    func test_retrieveImageData_deliversFoundDataWhenThereIsAStoredImageDataMatchingURL() throws {
-        try makeSUT { sut, imageDataURL in
+    func test_retrieveImageData_deliversFoundDataWhenThereIsAStoredImageDataMatchingURL() async throws {
+        try await makeSUT { sut, imageDataURL in
             assertThatRetrieveImageDataDeliversFoundDataWhenThereIsAStoredImageDataMatchingURL(on: sut, imageDataURL: imageDataURL)
         }
     }
     
-    func test_retrieveImageData_deliversLastInsertedValue() throws {
-        try makeSUT { sut, imageDataURL in
+    func test_retrieveImageData_deliversLastInsertedValue() async throws {
+        try await makeSUT { sut, imageDataURL in
             assertThatRetrieveImageDataDeliversLastInsertedValueForURL(on: sut, imageDataURL: imageDataURL)
         }
     }
     
     // - MARK: Private
     
-    private func makeSUT(_ test: @Sendable @escaping (CoreDataFeedStore, URL) -> Void, file: StaticString = #file, line: UInt = #line) throws {
+    private func makeSUT(_ test: @Sendable @escaping (CoreDataFeedStore, URL) -> Void, file: StaticString = #file, line: UInt = #line) async throws {
         let storeURL = URL(fileURLWithPath: "/dev/null")
         let sut = try CoreDataFeedStore(storeUrl: storeURL)
         trackMemoryLeaks(sut, file: file, line: line)
         
-        let exp = expectation(description: "wait for operation")
-        sut.perform {
+        await sut.perform {
             let imageDataURL = URL(string: "http://a-url.com")!
             insertFeedImage(with: imageDataURL, into: sut, file: file, line: line)
             test(sut, imageDataURL)
-            exp.fulfill()
         }
-        wait(for: [exp], timeout: 0.1)
     }
 }
 
