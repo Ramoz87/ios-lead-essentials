@@ -22,6 +22,7 @@ public protocol HTTPClient {
     func get(from url: URL) async throws -> (Data, HTTPURLResponse)
 }
 
+@MainActor
 public extension HTTPClient {
     func get(from url: URL) async throws -> (Data, HTTPURLResponse) {
         nonisolated(unsafe) var task: HTTPClientTask?
