@@ -174,7 +174,7 @@ final class FeedAcceptanceTests: XCTestCase {
         "a message"
     }
         
-    private func successResult(for url: URL) -> HTTPClient.Result {
+    private func successResult(for url: URL) -> Result<(Data, HTTPURLResponse), Error> {
         let response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!
         let data = data(for: url)
         return .success((data, response))
