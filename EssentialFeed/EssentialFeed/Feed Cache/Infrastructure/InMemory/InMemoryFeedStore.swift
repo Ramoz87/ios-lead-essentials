@@ -6,6 +6,7 @@
 //
 import Foundation
 
+@MainActor
 public class InMemoryFeedStore: FeedStore, FeedImageDataStore {
     private(set) var feedCache: CachedFeed?
     private var feedImageDataCache: [URL: Data] = [:]

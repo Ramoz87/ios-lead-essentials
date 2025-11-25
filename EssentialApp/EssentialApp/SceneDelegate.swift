@@ -34,7 +34,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         URLSessionHTTPClient(session: URLSession(configuration: .ephemeral))
     }()
     
-    private lazy var store: FeedStore & FeedImageDataStore = {
+    private lazy var store: FeedStore & FeedImageDataStore & StoreScheduler & Sendable = {
         do {
             return try CoreDataFeedStore(
                 storeUrl: NSPersistentContainer
@@ -57,7 +57,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         return UINavigationController(rootViewController: controller)
     }()
 
-    convenience init(httpClient: HTTPClient, store: FeedStore & FeedImageDataStore) {
+    convenience init(httpClient: HTTPClient, store: FeedStore & FeedImageDataStore & StoreScheduler & Sendable) {
         self.init()
         self.client = httpClient
         self.store = store
@@ -160,6 +160,32 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             .eraseToAnyPublisher()
     }
     
+    private func loadLocalImageWithRemoteFallback(url: URL) async throws -> Data {
+        do {
+            return try await loadLocalImage(url: url)
+        } catch {
+            return try await loadAndCacheRemoteImage(url: url)
+        }
+    }
+    
+    private func loadLocalImage(url: URL) async throws -> Data {
+        try await store.schedule { [store] in
+            let localImageLoader = LocalFeedImageDataLoader(store: store)
+            let imageData = try localImageLoader.loadImageData(from: url)
+            return imageData
+        }
+    }
+    
+    private func loadAndCacheRemoteImage(url: URL) async throws -> Data {
+        let (data, response) = try await client.get(from: url)
+        let imageData = try RemoteFeedImageDataMapper.map(data, from: response)
+        await store.schedule { [store] in
+            let localImageLoader = LocalFeedImageDataLoader(store: store)
+            try? localImageLoader.save(data, for: url)
+        }
+        return imageData
+    }
+    
     private func makeRemoteCommentsLoader(url: URL) -> () -> AnyPublisher<[ImageComment], Error> {
         return  { [client] in
             client
@@ -173,5 +199,28 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         Paginated(items: items, loadMorePublisher: last.map { last in
             { self.makeRemoteLoadMoreLoader(last: last) }
         })
+    }
+}
+
+protocol StoreScheduler {
+    @MainActor
+    func schedule<T>(_ action: @escaping @Sendable () throws -> T) async rethrows -> T
+}
+
+extension CoreDataFeedStore: StoreScheduler {
+    @MainActor
+    func schedule<T>(_ action: @escaping @Sendable () throws -> T) async rethrows -> T {
+        if contextQueue == .main {
+            return try action()
+        } else {
+            return try await perform(action)
+        }
+    }
+}
+
+extension InMemoryFeedStore: StoreScheduler {
+    @MainActor
+    func schedule<T>(_ action: @escaping @Sendable () throws -> T) async rethrows -> T {
+        try action()
     }
 }
