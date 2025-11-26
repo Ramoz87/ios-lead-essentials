@@ -12,16 +12,16 @@ import EssentialFeediOS
 @MainActor
 final class FeedViewAdapter: ResourceView {
     private weak var controller: ListViewController?
-    private let imageLoader: (URL) -> FeedImageDataLoader.Publisher
+    private let imageLoader: (URL) async throws -> Data
     private let selection: (FeedImage) -> Void
     private let currentFeed: [FeedImage: CellController]
     
-    private typealias ImageDataPresentationAdapter = LoadResourcePresenterAdapter<Data, WeakReference<FeedImageCellController>>
+    private typealias ImageDataPresentationAdapter = AsyncLoadResourcePresenterAdapter<Data, WeakReference<FeedImageCellController>>
     private typealias LoadMorePresentationAdapter = LoadResourcePresenterAdapter<Paginated<FeedImage>, FeedViewAdapter>
     
     init(currentFeed: [FeedImage: CellController] = [:],
          controller: ListViewController,
-         imageLoader: @escaping (URL) -> FeedImageDataLoader.Publisher,
+         imageLoader: @escaping (URL) async throws -> Data,
          selection: @escaping (FeedImage) -> Void) {
         self.controller = controller
         self.imageLoader = imageLoader
@@ -36,7 +36,7 @@ final class FeedViewAdapter: ResourceView {
         let feedSection = viewModel.items.map { model in
             if let controller = currentFeed[model] { return controller }
             
-            let adapter = ImageDataPresentationAdapter(loader: { [imageLoader] in imageLoader(model.url) })
+            let adapter = ImageDataPresentationAdapter(loader: { [imageLoader] in try await imageLoader(model.url) })
             
             let view = FeedImageCellController(
                 viewModel: FeedImagePresenter.map(model),
