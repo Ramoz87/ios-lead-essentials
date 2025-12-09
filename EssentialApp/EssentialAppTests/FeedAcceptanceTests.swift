@@ -13,14 +13,17 @@ import EssentialFeediOS
 final class FeedAcceptanceTests: XCTestCase {
     
     func test_onLaunch_displaysRemoteFeedWhenCustomerHasConnectivity() throws {
-        let feed = try launch(httpClient: .online(successResult), store: .empty)
+        let store = try CoreDataFeedStore.empty
+        let feed = try launch(httpClient: .online(successResult), store: store)
     
         XCTAssertEqual(feed.numberOfRenderedFeedImageViews(), 2)
         XCTAssertEqual(feed.renderedFeedImageData(at: 0), makeImageData(at: 0))
         XCTAssertEqual(feed.renderedFeedImageData(at: 1), makeImageData(at: 1))
         XCTAssertTrue(feed.canLoadMoreFeed)
         
-        feed.simulateLoadMoreFeedAction()
+        try store.performAndWait {
+            feed.simulateLoadMoreFeedAction()
+        }
         
         XCTAssertEqual(feed.numberOfRenderedFeedImageViews(), 3)
         XCTAssertEqual(feed.renderedFeedImageData(at: 0), makeImageData(at: 0))
@@ -28,7 +31,9 @@ final class FeedAcceptanceTests: XCTestCase {
         XCTAssertEqual(feed.renderedFeedImageData(at: 2), makeImageData(at: 2))
         XCTAssertTrue(feed.canLoadMoreFeed)
         
-        feed.simulateLoadMoreFeedAction()
+        try store.performAndWait {
+            feed.simulateLoadMoreFeedAction()
+        }
         
         XCTAssertEqual(feed.numberOfRenderedFeedImageViews(), 3)
         XCTAssertEqual(feed.renderedFeedImageData(at: 0), makeImageData(at: 0))
@@ -39,16 +44,17 @@ final class FeedAcceptanceTests: XCTestCase {
     
     func test_onLaunch_displaysCachedRemoteFeedWhenCustomerHasNoConnectivity() throws {
         let store = try CoreDataFeedStore.empty
-        
         let onlineFeed = try launch(httpClient: .online(successResult), store: store)
         onlineFeed.simulateFeedImageViewVisible(at: 0)
         onlineFeed.simulateFeedImageViewVisible(at: 1)
         
-        onlineFeed.simulateLoadMoreFeedAction()
+        try store.performAndWait {
+            onlineFeed.simulateLoadMoreFeedAction()
+        }
+        
         onlineFeed.simulateFeedImageViewVisible(at: 2)
         
         let offlineFeed = try launch(httpClient: .offline, store: store)
-        
         XCTAssertEqual(offlineFeed.numberOfRenderedFeedImageViews(), 3)
         XCTAssertEqual(offlineFeed.renderedFeedImageData(at: 0), makeImageData(at: 0))
         XCTAssertEqual(offlineFeed.renderedFeedImageData(at: 1), makeImageData(at: 1))
@@ -183,6 +189,26 @@ final class FeedAcceptanceTests: XCTestCase {
 
 @MainActor
 extension CoreDataFeedStore {
+    
+    private struct Timeout: Error {}
+    
+    func performAndWait(_ action: () -> Void, timeout: TimeInterval = 1) throws {
+        let state = try retrieve()?.timestamp
+        action()
+        
+        let maxDate = Date() + timeout
+        while Date() <= maxDate {
+            if try retrieve()?.timestamp != state {
+                return
+            }
+            
+            RunLoop.current.run(until: Date())
+        }
+        
+        throw Timeout()
+    }
+    
+    
     static var empty: CoreDataFeedStore {
         get throws {
             try CoreDataFeedStore(storeUrl: URL(fileURLWithPath: "/dev/null"), contextQueue: .main)

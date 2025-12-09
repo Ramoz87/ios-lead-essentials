@@ -151,7 +151,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         return try RemoteFeedLoaderDataMapper.map(data, response)
     }
     
-    private func makeRemoteFeedLoaderWithLocalFallback() -> Paginated<FeedImage>.Publisher {        
+    private func makeRemoteFeedLoaderWithLocalFallback() -> Paginated<FeedImage>.Publisher {
         Deferred {
             Future { completion in
                 Task.immediate {
@@ -167,13 +167,34 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         .eraseToAnyPublisher()
     }
     
+    private func loadMoreRemoteFeed(last: FeedImage?) async throws -> Paginated<FeedImage> {
+        async let cachedFeed = try await loadLocalFeed()
+        async let newFeed = try await loadRemoteFeed(after: last)
+       
+        let items = try await cachedFeed + newFeed
+        
+        await store.schedule { [store] in
+            let localFeedLoader = LocalFeedLoader(store: store, date: Date.init)
+            try? localFeedLoader.save(items)
+        }
+        
+        return try await makePage(items: items, last: newFeed.last)
+    }
+    
     private func makeRemoteLoadMoreLoader(last: FeedImage?) -> Paginated<FeedImage>.Publisher {
-        localFeedLoader
-            .loadPublisher()
-            .zip(makeRemoteFeedLoader(after: last))
-            .map { self.makePage(items: $0 + $1, last: $1.last) }
-            .receive(on: scheduler)
-            .caching(to: localFeedLoader)
+        Deferred {
+            Future { completion in
+                Task.immediate {
+                    do {
+                        let feed = try await self.loadMoreRemoteFeed(last: last)
+                        completion(.success(feed))
+                    } catch {
+                        completion(.failure(error))
+                    }
+                }
+            }
+        }
+        .eraseToAnyPublisher()
     }
     
     private func makeRemoteFeedLoader(after: FeedImage? = nil) -> AnyPublisher<[FeedImage], Error> {
