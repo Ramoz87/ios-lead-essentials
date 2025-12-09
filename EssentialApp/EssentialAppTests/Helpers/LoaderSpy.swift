@@ -13,48 +13,54 @@ import EssentialFeediOS
 @MainActor
 class LoaderSpy {
     
-    private var feedRequests = [PassthroughSubject<Paginated<FeedImage>, Error>]()
-    private var loadMoreRequests = [PassthroughSubject<Paginated<FeedImage>, Error>]()
+    private var feedLoader = AsyncLoaderSpy<Void, Paginated<FeedImage>>()
     
     var loadCallCount: Int {
-        feedRequests.count
+        feedLoader.requests.count
     }
     
-    func loadPublisher() -> Paginated<FeedImage>.Publisher {
-        let publisher = PassthroughSubject<Paginated<FeedImage>, Error>()
-        feedRequests.append(publisher)
-        return publisher.eraseToAnyPublisher()
+    func loadFeed() async throws -> Paginated<FeedImage> {
+        return try await feedLoader.load(())
     }
     
-    func completeFeedLoading(with feed: [FeedImage] = [], at index: Int = 0) {
-        feedRequests[index].send(Paginated(items: feed, loadMorePublisher: loadMorePublisher()))
-        feedRequests[index].send(completion: .finished)
+    func completeFeedLoading(with feed: [FeedImage] = [], at index: Int = 0) async {
+        let loadMore: @Sendable () async throws -> Paginated<FeedImage> = { @MainActor [weak self] in
+            try await self?.loadMore() ?? Paginated(items: [])
+        }
+        
+        await feedLoader.complete(
+            with: Paginated(items: feed, loadMore: loadMore),
+            at: index)
     }
     
-    func completeFeedLoadingWithError(at index: Int = 0) {
-        feedRequests[index].send(completion: .failure(anyNSError()))
+    func completeFeedLoadingWithError(at index: Int = 0) async {
+        await feedLoader.fail(with: anyNSError(), at: index)
     }
     
     //MARK: - FeedLoadMore
     
+    private var loadMoreLoader = AsyncLoaderSpy<Void, Paginated<FeedImage>>()
+    
     var loadMoreCallCount: Int {
-        loadMoreRequests.count
+        loadMoreLoader.requests.count
     }
     
-    func loadMorePublisher() -> () -> Paginated<FeedImage>.Publisher {
-        return { [weak self] in
-            let publisher = PassthroughSubject<Paginated<FeedImage>, Error>()
-            self?.loadMoreRequests.append(publisher)
-            return publisher.eraseToAnyPublisher()
+    func loadMore() async throws -> Paginated<FeedImage> {
+        try await loadMoreLoader.load(())
+    }
+    
+    func completeLoadMore(with feed: [FeedImage] = [], lastPage: Bool = false, at index: Int = 0) async {
+        let loadMore: @Sendable () async throws -> Paginated<FeedImage> = { @MainActor [weak self] in
+            try await self?.loadMore() ?? Paginated(items: [])
         }
+        
+        await loadMoreLoader.complete(
+            with: Paginated(items: feed, loadMore: lastPage ? nil : loadMore),
+            at: index)
     }
     
-    func completeLoadMore(with feed: [FeedImage] = [], lastPage: Bool = false, at index: Int = 0) {
-        loadMoreRequests[index].send(Paginated(items: feed, loadMorePublisher: lastPage ? nil : loadMorePublisher()))
-    }
-    
-    func completeLoadMoreWithError(at index: Int = 0) {
-        loadMoreRequests[index].send(completion: .failure(anyNSError()))
+    func completeLoadMoreWithError(at index: Int = 0) async {
+        await loadMoreLoader.fail(with: anyNSError(), at: index)
     }
     
     //MARK: - FeedImageDataLoader
@@ -73,12 +79,12 @@ class LoaderSpy {
         try await imageLoader.load(url)
     }
     
-    func completeImageLoading(with imageData: Data = Data(), at index: Int = 0) {
-        imageLoader.complete(with: imageData, at: index)
+    func completeImageLoading(with imageData: Data = Data(), at index: Int = 0) async {
+        await imageLoader.complete(with: imageData, at: index)
     }
     
-    func completeImageLoadingWithError(at index: Int = 0) {
-        imageLoader.fail(with: anyNSError(), at: index)
+    func completeImageLoadingWithError(at index: Int = 0) async {
+        await imageLoader.fail(with: anyNSError(), at: index)
     }
     
     func result(at index: Int, timeout: TimeInterval = 1) async throws -> AsyncResult {
@@ -87,6 +93,8 @@ class LoaderSpy {
     
     func cancelPendingRequests() async throws {
         try await imageLoader.cancelPendingRequests()
+        try await loadMoreLoader.cancelPendingRequests()
+        try await feedLoader.cancelPendingRequests()
     }
 }
 
@@ -128,17 +136,17 @@ class AsyncLoaderSpy<Param, Resource> where Resource: Sendable {
         }
     }
     
-    func complete(with resource: Resource, at index: Int = 0) {
+    func complete(with resource: Resource, at index: Int = 0) async {
         requests[index].continuation.yield(resource)
         requests[index].continuation.finish()
         
-        while requests[index].result == nil { RunLoop.current.run(until: Date()) }
+        while requests[index].result == nil { await Task.yield() }
     }
     
-    func fail(with error: Error, at index: Int = 0) {
+    func fail(with error: Error, at index: Int = 0) async {
         requests[index].continuation.finish(throwing: error)
         
-        while requests[index].result == nil { RunLoop.current.run(until: Date()) }
+        while requests[index].result == nil { await Task.yield() }
     }
     
     func result(at index: Int, timeout: TimeInterval = 1) async throws -> AsyncResult {

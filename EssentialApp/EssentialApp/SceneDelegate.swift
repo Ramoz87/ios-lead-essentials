@@ -51,7 +51,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     private lazy var navigationController = {
         let controller = FeedUIComposer.feedViewController(
-            feedLoader: makeRemoteFeedLoaderWithLocalFallback,
+            feedLoader: loadRemoteFeedWithLocalFallback,
             imageLoader: loadLocalImageWithRemoteFallback,
             selection: showComments)
         return UINavigationController(rootViewController: controller)
@@ -151,22 +151,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         return try RemoteFeedLoaderDataMapper.map(data, response)
     }
     
-    private func makeRemoteFeedLoaderWithLocalFallback() -> Paginated<FeedImage>.Publisher {
-        Deferred {
-            Future { completion in
-                Task.immediate {
-                    do {
-                        let feed = try await self.loadRemoteFeedWithLocalFallback()
-                        completion(.success(feed))
-                    } catch {
-                        completion(.failure(error))
-                    }
-                }
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-    
     private func loadMoreRemoteFeed(last: FeedImage?) async throws -> Paginated<FeedImage> {
         async let cachedFeed = try await loadLocalFeed()
         async let newFeed = try await loadRemoteFeed(after: last)
@@ -181,44 +165,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         return try await makePage(items: items, last: newFeed.last)
     }
     
-    private func makeRemoteLoadMoreLoader(last: FeedImage?) -> Paginated<FeedImage>.Publisher {
-        Deferred {
-            Future { completion in
-                Task.immediate {
-                    do {
-                        let feed = try await self.loadMoreRemoteFeed(last: last)
-                        completion(.success(feed))
-                    } catch {
-                        completion(.failure(error))
-                    }
-                }
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-    
-    private func makeRemoteFeedLoader(after: FeedImage? = nil) -> AnyPublisher<[FeedImage], Error> {
-        let url = FeedEndpoint.get(after: after).url(baseURL: baseURL)
-        return client
-            .getPublisher(url: url)
-            .tryMap(RemoteFeedLoaderDataMapper.map)
-            .eraseToAnyPublisher()
-    }
-    
-    
     private func loadLocalImageWithRemoteFallback(url: URL) async throws -> Data {
         do {
             return try await loadLocalImage(url: url)
         } catch {
             return try await loadAndCacheRemoteImage(url: url)
-        }
-    }
-    
-    private func loadLocalImage(url: URL) async throws -> Data {
-        try await store.schedule { [store] in
-            let localImageLoader = LocalFeedImageDataLoader(store: store)
-            let imageData = try localImageLoader.loadImageData(from: url)
-            return imageData
         }
     }
     
@@ -232,6 +183,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         return imageData
     }
     
+    private func loadLocalImage(url: URL) async throws -> Data {
+        try await store.schedule { [store] in
+            let localImageLoader = LocalFeedImageDataLoader(store: store)
+            let imageData = try localImageLoader.loadImageData(from: url)
+            return imageData
+        }
+    }
+    
     private func makeRemoteCommentsLoader(url: URL) -> () -> AnyPublisher<[ImageComment], Error> {
         return  { [client] in
             client
@@ -242,8 +201,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     
     private func makePage(items: [FeedImage], last: FeedImage?) -> Paginated<FeedImage> {
-        Paginated(items: items, loadMorePublisher: last.map { last in
-            { self.makeRemoteLoadMoreLoader(last: last) }
+        Paginated(items: items, loadMore: last.map { last in
+            { @MainActor @Sendable in try await self.loadMoreRemoteFeed(last: last) }
         })
     }
 }
