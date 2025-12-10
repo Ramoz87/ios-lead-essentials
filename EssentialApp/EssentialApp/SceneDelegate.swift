@@ -191,12 +191,26 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
     }
     
+    private func loadRemoteComments(url: URL) async throws -> [ImageComment] {
+        let (data, response) = try await client.get(from: url)
+        return try ImageCommentsMapper.map(data, response)
+    }
+    
     private func makeRemoteCommentsLoader(url: URL) -> () -> AnyPublisher<[ImageComment], Error> {
-        return  { [client] in
-            client
-                .getPublisher(url: url)
-                .tryMap(ImageCommentsMapper.map)
-                .eraseToAnyPublisher()
+        return {
+            Deferred {
+                Future { completion in
+                    Task.immediate {
+                        do {
+                            let result = try await self.loadRemoteComments(url: url)
+                            completion(.success(result))
+                        } catch {
+                            completion(.failure(error))
+                        }
+                    }
+                }
+            }
+            .eraseToAnyPublisher()
         }
     }
     
