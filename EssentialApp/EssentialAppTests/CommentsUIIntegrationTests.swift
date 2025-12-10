@@ -6,7 +6,6 @@
 //
 
 import XCTest
-import Combine
 import EssentialFeed
 import EssentialFeediOS
 import EssentialApp
@@ -22,31 +21,31 @@ final class CommentsUIIntegrationTests: XCTestCase {
         XCTAssertEqual(sut.title, commentsTitle)
     }
     
-    func test_loadCommentsActions_requestCommentsFromLoader() {
+    func test_loadCommentsActions_requestCommentsFromLoader() async {
         let (sut, loader) = makeSUT()
                 
         sut.simulateAppearance()
-        XCTAssertEqual(loader.loadCallCount, 1, "Expected loading requests when view appears first time")
+        XCTAssertEqual(loader.requestsCount, 1, "Expected loading requests when view appears first time")
         
         sut.simulateUserInitiatedReload()
-        XCTAssertEqual(loader.loadCallCount, 1, "Expected no request until previous completes")
+        XCTAssertEqual(loader.requestsCount, 1, "Expected no request until previous completes")
         
-        loader.completeLoading(at: 0)
+        await loader.completeLoading(at: 0)
         sut.simulateUserInitiatedReload()
-        XCTAssertEqual(loader.loadCallCount, 2, "Expected another loading request once user initiates a reload")
+        XCTAssertEqual(loader.requestsCount, 2, "Expected another loading request once user initiates a reload")
         
-        loader.completeLoading(at: 1)
+        await loader.completeLoading(at: 1)
         sut.simulateUserInitiatedReload()
-        XCTAssertEqual(loader.loadCallCount, 3, "Expected yet another loading request once user initiates another reload")
+        XCTAssertEqual(loader.requestsCount, 3, "Expected yet another loading request once user initiates another reload")
     }
     
-    func test_loadCommentsActions_loadingIndicatorIsVisibleWhileLoadingFeed() {
+    func test_loadCommentsActions_loadingIndicatorIsVisibleWhileLoadingFeed() async {
         let (sut, loader) = makeSUT()
         
         sut.simulateAppearance()
         XCTAssertEqual(sut.isShowingLoadingIndicator, true, "Expected loading indicator is visible when view appears")
         
-        loader.completeLoading()
+        await loader.completeLoading()
         XCTAssertEqual(sut.isShowingLoadingIndicator, false, "Expected loading indicator hides when loading completes successfully")
         
         sut.simulateAppearance()
@@ -55,11 +54,11 @@ final class CommentsUIIntegrationTests: XCTestCase {
         sut.simulateUserInitiatedReload()
         XCTAssertEqual(sut.isShowingLoadingIndicator, true, "Expected loading indicator visible when user initiates a reload")
        
-        loader.completeLoading(at: 1)
+        await loader.completeLoading(at: 1)
         XCTAssertEqual(sut.isShowingLoadingIndicator, false, "Expected loading indicator hides when user initiated reload completes with error")
     }
     
-    func test_loadCommentsCompletion_rendersSuccessfullyLoadedComments() {
+    func test_loadCommentsCompletion_rendersSuccessfullyLoadedComments() async {
         let comment0 = makeComment(message: "a message", username: "a username")
         let comment1 = makeComment(message: "another message", username: "another username")
         let (sut, loader) = makeSUT()
@@ -67,92 +66,93 @@ final class CommentsUIIntegrationTests: XCTestCase {
         sut.simulateAppearance()
         assertThat(sut, isRendering: [ImageComment]())
 
-        loader.completeLoading(with: [comment0], at: 0)
+        await loader.completeLoading(with: [comment0], at: 0)
         assertThat(sut, isRendering: [comment0])
         
         sut.simulateUserInitiatedReload()
-        loader.completeLoading(with: [comment0, comment1], at: 1)
+        await loader.completeLoading(with: [comment0, comment1], at: 1)
         assertThat(sut, isRendering: [comment0, comment1])
     }
     
-    func test_loadCommentsCompletion_rendersSuccessfullyLoadedEmptyCommentsAfterNonEmptyComments() {
+    func test_loadCommentsCompletion_rendersSuccessfullyLoadedEmptyCommentsAfterNonEmptyComments() async {
         let comment = makeComment()
         let (sut, loader) = makeSUT()
         
         sut.simulateAppearance()
-        loader.completeLoading(with: [comment], at: 0)
+        await loader.completeLoading(with: [comment], at: 0)
         assertThat(sut, isRendering: [comment])
         
         sut.simulateUserInitiatedReload()
-        loader.completeLoading(with: [], at: 1)
+        await loader.completeLoading(with: [], at: 1)
         assertThat(sut, isRendering: [ImageComment]())
     }
     
-    func test_loadCommentsCompletion_doesNotAlterCurrentRenderingStateOnError() {
+    func test_loadCommentsCompletion_doesNotAlterCurrentRenderingStateOnError() async {
         let comment = makeComment()
         let (sut, loader) = makeSUT()
         
         sut.simulateAppearance()
-        loader.completeLoading(with: [comment], at: 0)
+        await loader.completeLoading(with: [comment], at: 0)
         assertThat(sut, isRendering: [comment])
         
         sut.simulateUserInitiatedReload()
-        loader.completeLoadingWithError(at: 1)
+        await loader.completeLoadingWithError(at: 1)
         assertThat(sut, isRendering: [comment])
     }
     
-    func test_loadCommentsCompletion_rendersErrorMessageOnErrorUntilNextReload() {
+    func test_loadCommentsCompletion_rendersErrorMessageOnErrorUntilNextReload() async {
         let (sut, loader) = makeSUT()
         
         sut.simulateAppearance()
         
         XCTAssertEqual(sut.errorMessage, nil)
         
-        loader.completeLoadingWithError(at: 0)
+        await loader.completeLoadingWithError(at: 0)
         XCTAssertEqual(sut.errorMessage, loadError)
         
         sut.simulateUserInitiatedReload()
         XCTAssertEqual(sut.errorMessage, nil)
     }
     
-    func test_tapOnErrorView_hidesErrorMessage() {
+    func test_tapOnErrorView_hidesErrorMessage() async {
         let (sut, loader) = makeSUT()
         
         sut.simulateAppearance()
-        loader.completeLoadingWithError(at: 0)
+        await loader.completeLoadingWithError(at: 0)
         XCTAssertEqual(sut.errorMessage, loadError)
         
         sut.simulateErrorViewTap()
         XCTAssertEqual(sut.errorMessage, nil)
     }
     
-    func test_deinit_cancelsRunningRequest() {
-        var cancelCallCount = 0
-        var sut: ListViewController?
+    func test_deinit_cancelsRunningRequest() async throws {
+        let loader = LoaderSpy()
         
         addTeardownBlock {
-            XCTAssertEqual(cancelCallCount, 1)
+            XCTAssertEqual(loader.cancelledRequestsCount, 1)
         }
         
-        sut = CommentsUIComposer.commentsController(loader: {
-            PassthroughSubject<[ImageComment], Error>().handleEvents(receiveCancel: {
-                cancelCallCount += 1
-            }).eraseToAnyPublisher()
-        })
-        
+        var sut: ListViewController? = CommentsUIComposer.commentsController(loader: loader.load)
         sut?.simulateAppearance()
-        XCTAssertEqual(cancelCallCount, 0)
         
         sut = nil
+        
+        let result = try await loader.result(at: 0)
+        XCTAssertEqual(result, .cancelled)
+        XCTAssertEqual(loader.cancelledRequestsCount, 1)
     }
     
     //MARK: - Helpers
     
     private func makeSUT(file: StaticString = #file, line: UInt = #line) -> (ListViewController, LoaderSpy) {
         let loader = LoaderSpy()
-        let sut = CommentsUIComposer.commentsController(loader: loader.loadPublisher)
+        let sut = CommentsUIComposer.commentsController(loader: loader.load)
         trackMemoryLeaks(sut, file: file, line: line)
         trackMemoryLeaks(loader, file: file, line: line)
+        
+        addTeardownBlock { [weak loader] in
+            try await loader?.cancelPendingRequests()
+        }
         return (sut, loader)
     }
     
@@ -172,26 +172,37 @@ final class CommentsUIIntegrationTests: XCTestCase {
         return ImageComment(id: UUID(), message: message, createdAt: Date(), username: username)
     }
     
+    @MainActor
     private class LoaderSpy {
         
-        private var requests = [PassthroughSubject<[ImageComment], Error>]()
-        var loadCallCount: Int {
-            return requests.count
+        private var loader = AsyncLoaderSpy<Void, [ImageComment]>()
+        
+        var requestsCount: Int {
+            return loader.requests.count
         }
         
-        func loadPublisher() -> AnyPublisher<[ImageComment], Error> {
-            let publisher = PassthroughSubject<[ImageComment], Error>()
-            requests.append(publisher)
-            return publisher.eraseToAnyPublisher()
+        var cancelledRequestsCount: Int {
+            return loader.requests.count { $0.result == .cancelled }
         }
         
-        func completeLoading(with feed: [ImageComment] = [], at index: Int = 0) {
-            requests[index].send(feed)
-            requests[index].send(completion: .finished)
+        func load() async throws -> [ImageComment] {
+            try await loader.load(())
         }
         
-        func completeLoadingWithError(at index: Int = 0) {
-            requests[index].send(completion: .failure(anyNSError()))
+        func completeLoading(with feed: [ImageComment] = [], at index: Int = 0) async {
+            await loader.complete(with: feed, at: index)
+        }
+        
+        func completeLoadingWithError(at index: Int = 0) async {
+            await loader.fail(with: anyNSError(), at: index)
+        }
+        
+        func result(at index: Int, timeout: TimeInterval = 1) async throws -> AsyncResult {
+            try await loader.result(at: index, timeout: timeout)
+        }
+        
+        func cancelPendingRequests() async throws {
+            try await loader.cancelPendingRequests()
         }
     }
 }

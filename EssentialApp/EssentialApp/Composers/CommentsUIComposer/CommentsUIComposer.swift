@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import Combine
 import EssentialFeed
 import EssentialFeediOS
 
@@ -14,9 +13,9 @@ import EssentialFeediOS
 public final class CommentsUIComposer {
     private init() {}
     
-    private typealias CommentsPresentationAdapter = LoadResourcePresenterAdapter<[ImageComment], CommentsViewAdapter>
+    private typealias CommentsPresentationAdapter = AsyncLoadResourcePresenterAdapter<[ImageComment], CommentsViewAdapter>
     
-    public static func commentsController(loader: @escaping () -> AnyPublisher<[ImageComment], Error>) -> ListViewController {
+    public static func commentsController(loader: @escaping () async throws -> [ImageComment]) -> ListViewController {
         let presenterAdapter = CommentsPresentationAdapter(loader: loader)
         let controller = makeViewController(title: ImageCommentsPresenter.title)
         controller.onRefresh = presenterAdapter.loadResource

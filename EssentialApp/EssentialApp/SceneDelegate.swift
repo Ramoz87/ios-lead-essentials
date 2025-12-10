@@ -7,7 +7,6 @@
 
 import UIKit
 import CoreData
-import Combine
 import os
 import EssentialFeed
 import EssentialFeediOS
@@ -114,7 +113,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     private func showComments(for image: FeedImage) {
         let url = ImageCommentsEndpoint.get(image.id).url(baseURL: baseURL)
-        let comments = CommentsUIComposer.commentsController(loader: makeRemoteCommentsLoader(url: url) )
+        let comments = CommentsUIComposer.commentsController(loader: loadRemoteComments(url: url))
         navigationController.pushViewController(comments, animated: true)
     }
     
@@ -191,26 +190,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
     }
     
-    private func loadRemoteComments(url: URL) async throws -> [ImageComment] {
-        let (data, response) = try await client.get(from: url)
-        return try ImageCommentsMapper.map(data, response)
-    }
-    
-    private func makeRemoteCommentsLoader(url: URL) -> () -> AnyPublisher<[ImageComment], Error> {
-        return {
-            Deferred {
-                Future { completion in
-                    Task.immediate {
-                        do {
-                            let result = try await self.loadRemoteComments(url: url)
-                            completion(.success(result))
-                        } catch {
-                            completion(.failure(error))
-                        }
-                    }
-                }
-            }
-            .eraseToAnyPublisher()
+    private func loadRemoteComments(url: URL) -> () async throws -> [ImageComment] {
+        return { [client] in
+            let (data, response) = try await client.get(from: url)
+            return try ImageCommentsMapper.map(data, response)
         }
     }
     
