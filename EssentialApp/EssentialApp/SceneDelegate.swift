@@ -204,7 +204,6 @@ protocol Scheduler {
 }
 
 extension CoreDataFeedStore: Scheduler {
-    @MainActor
     func schedule<T>(_ action: @escaping @Sendable () throws -> T) async rethrows -> T {
         if contextQueue == .main {
             return try action()
@@ -215,7 +214,6 @@ extension CoreDataFeedStore: Scheduler {
 }
 
 extension InMemoryFeedStore: Scheduler {
-    @MainActor
     func schedule<T>(_ action: @escaping @Sendable () throws -> T) async rethrows -> T {
         try action()
     }
