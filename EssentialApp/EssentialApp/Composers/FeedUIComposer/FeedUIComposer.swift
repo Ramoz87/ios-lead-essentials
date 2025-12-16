@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import Combine
 import EssentialFeed
 import EssentialFeediOS
 
@@ -14,7 +13,7 @@ import EssentialFeediOS
 public final class FeedUIComposer {
     private init() {}
     
-    private typealias FeedPresentationAdapter = AsyncLoadResourcePresenterAdapter<Paginated<FeedImage>, FeedViewAdapter>
+    private typealias FeedPresentationAdapter = LoadResourcePresenterAdapter<Paginated<FeedImage>, FeedViewAdapter>
     
     public static func feedViewController(
         feedLoader: @MainActor @escaping () async throws -> Paginated<FeedImage>,

@@ -13,7 +13,7 @@ import EssentialFeediOS
 public final class CommentsUIComposer {
     private init() {}
     
-    private typealias CommentsPresentationAdapter = AsyncLoadResourcePresenterAdapter<[ImageComment], CommentsViewAdapter>
+    private typealias CommentsPresentationAdapter = LoadResourcePresenterAdapter<[ImageComment], CommentsViewAdapter>
     
     public static func commentsController(loader: @escaping () async throws -> [ImageComment]) -> ListViewController {
         let presenterAdapter = CommentsPresentationAdapter(loader: loader)

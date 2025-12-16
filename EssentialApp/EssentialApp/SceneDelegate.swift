@@ -18,22 +18,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private lazy var baseURL = URL(string: "https://ile-api.essentialdeveloper.com/essential-feed")!
     private lazy var logger = Logger(subsystem: "com.essentialdeveloper.EssentialApp", category: "main")
     
-    private lazy var scheduler: AnyDispatchQueueScheduler = {
-        if let store = store as? CoreDataFeedStore {
-            return .scheduler(for: store)
-        }
-        
-        return DispatchQueue(
-            label: "com.essentialdeveloper.queue",
-            qos: .userInitiated
-        ).eraseToAnyScheduler()
-    }()
-    
     private lazy var client: HTTPClient = {
         URLSessionHTTPClient(session: URLSession(configuration: .ephemeral))
     }()
     
-    private lazy var store: FeedStore & FeedImageDataStore & StoreScheduler & Sendable = {
+    private lazy var store: FeedStore & FeedImageDataStore & Scheduler & Sendable = {
         do {
             return try CoreDataFeedStore(
                 storeUrl: NSPersistentContainer
@@ -46,8 +35,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
     }()
     
-    private lazy var localFeedLoader = LocalFeedLoader(store: store, date: Date.init)
-    
     private lazy var navigationController = {
         let controller = FeedUIComposer.feedViewController(
             feedLoader: loadRemoteFeedWithLocalFallback,
@@ -56,7 +43,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         return UINavigationController(rootViewController: controller)
     }()
 
-    convenience init(httpClient: HTTPClient, store: FeedStore & FeedImageDataStore & StoreScheduler & Sendable) {
+    convenience init(httpClient: HTTPClient, store: FeedStore & FeedImageDataStore & Scheduler & Sendable) {
         self.init()
         self.client = httpClient
         self.store = store
@@ -86,13 +73,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneWillResignActive(_ scene: UIScene) {
         // Called when the scene will move from an active state to an inactive state.
         // This may occur due to temporary interruptions (ex. an incoming phone call).
-        scheduler.schedule { [localFeedLoader, logger] in
-            do {
-                try localFeedLoader.validateCache()
-            } catch {
-                logger.error("Failed to validate cache with error: \(error.localizedDescription)")
-            }
-        }
+        validateCache()
     }
 
     func sceneWillEnterForeground(_ scene: UIScene) {
@@ -202,14 +183,27 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             { @MainActor @Sendable in try await self.loadMoreRemoteFeed(last: last) }
         })
     }
+    
+    private func validateCache() {
+        Task.immediate {
+            await store.schedule { [store, logger] in
+                do {
+                    let localFeedLoader = LocalFeedLoader(store: store, date: Date.init)
+                    try localFeedLoader.validateCache()
+                } catch {
+                    logger.error("Failed to validate cache with error: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
 }
 
-protocol StoreScheduler {
+protocol Scheduler {
     @MainActor
     func schedule<T>(_ action: @escaping @Sendable () throws -> T) async rethrows -> T
 }
 
-extension CoreDataFeedStore: StoreScheduler {
+extension CoreDataFeedStore: Scheduler {
     @MainActor
     func schedule<T>(_ action: @escaping @Sendable () throws -> T) async rethrows -> T {
         if contextQueue == .main {
@@ -220,7 +214,7 @@ extension CoreDataFeedStore: StoreScheduler {
     }
 }
 
-extension InMemoryFeedStore: StoreScheduler {
+extension InMemoryFeedStore: Scheduler {
     @MainActor
     func schedule<T>(_ action: @escaping @Sendable () throws -> T) async rethrows -> T {
         try action()

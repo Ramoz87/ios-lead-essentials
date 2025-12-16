@@ -16,8 +16,8 @@ final class FeedViewAdapter: ResourceView {
     private let selection: (FeedImage) -> Void
     private let currentFeed: [FeedImage: CellController]
     
-    private typealias ImageDataPresentationAdapter = AsyncLoadResourcePresenterAdapter<Data, WeakReference<FeedImageCellController>>
-    private typealias LoadMorePresentationAdapter = AsyncLoadResourcePresenterAdapter<Paginated<FeedImage>, FeedViewAdapter>
+    private typealias ImageDataPresentationAdapter = LoadResourcePresenterAdapter<Data, WeakReference<FeedImageCellController>>
+    private typealias LoadMorePresentationAdapter = LoadResourcePresenterAdapter<Paginated<FeedImage>, FeedViewAdapter>
     
     init(currentFeed: [FeedImage: CellController] = [:],
          controller: ListViewController,
