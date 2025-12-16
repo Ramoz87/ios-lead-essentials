@@ -68,7 +68,7 @@ class LoadResourcePresenterTests: XCTestCase {
     
     private func makeSUT(
         mapper: @escaping SUT.Mapper = { _ in "any" },
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line) -> (sut: SUT, view: ViewSpy) {
             let view = ViewSpy()
             let sut = SUT(resourceView: view, loadingView: view, errorView: view, mapper: mapper)
@@ -77,7 +77,7 @@ class LoadResourcePresenterTests: XCTestCase {
             return (sut, view)
         }
     
-    func localized(_ key: String, file: StaticString = #file, line: UInt = #line) -> String {
+    func localized(_ key: String, file: StaticString = #filePath, line: UInt = #line) -> String {
         let table = "Shared"
         let bundle = Bundle(for: SUT.self)
         let value = bundle.localizedString(forKey: key, value: nil, table: table)

@@ -78,7 +78,7 @@ final class URLSessionHTTPClientTests: XCTestCase {
     
     //MARK: - Helpers
     
-    private func makeSUT(file: StaticString = #file, line: UInt = #line) -> URLSessionHTTPClient {
+    private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> URLSessionHTTPClient {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [URLProtocolStub.self]
         let session = URLSession(configuration: configuration)
@@ -87,7 +87,7 @@ final class URLSessionHTTPClientTests: XCTestCase {
         return sut
     }
     
-    private func resultValuesFor(_ values: (data: Data?, response: URLResponse?, error: Error?)? = nil, taskHandler: (Task<(Data, HTTPURLResponse), Error>) -> Void = { _ in }, file: StaticString = #file, line: UInt = #line) async -> (data: Data, response: HTTPURLResponse)? {
+    private func resultValuesFor(_ values: (data: Data?, response: URLResponse?, error: Error?)? = nil, taskHandler: (Task<(Data, HTTPURLResponse), Error>) -> Void = { _ in }, file: StaticString = #filePath, line: UInt = #line) async -> (data: Data, response: HTTPURLResponse)? {
        
         do {
             return try await resultFor(values, taskHandler: taskHandler, file: file, line: line)
@@ -97,7 +97,7 @@ final class URLSessionHTTPClientTests: XCTestCase {
         }
     }
     
-    private func resultErrorFor(_ values: (data: Data?, response: URLResponse?, error: Error?)? = nil, taskHandler: (Task<(Data, HTTPURLResponse), Error>) -> Void = { _ in }, file: StaticString = #file, line: UInt = #line) async -> Error? {
+    private func resultErrorFor(_ values: (data: Data?, response: URLResponse?, error: Error?)? = nil, taskHandler: (Task<(Data, HTTPURLResponse), Error>) -> Void = { _ in }, file: StaticString = #filePath, line: UInt = #line) async -> Error? {
         
         do {
             let result = try await resultFor(values, taskHandler: taskHandler, file: file, line: line)
@@ -108,7 +108,7 @@ final class URLSessionHTTPClientTests: XCTestCase {
         }
     }
     
-    private func resultFor(_ values: (data: Data?, response: URLResponse?, error: Error?)?, taskHandler: (Task<(Data, HTTPURLResponse), Error>) -> Void = { _ in },  file: StaticString = #file, line: UInt = #line) async throws -> (Data, HTTPURLResponse) {
+    private func resultFor(_ values: (data: Data?, response: URLResponse?, error: Error?)?, taskHandler: (Task<(Data, HTTPURLResponse), Error>) -> Void = { _ in },  file: StaticString = #filePath, line: UInt = #line) async throws -> (Data, HTTPURLResponse) {
         
         values.map { URLProtocolStub.stub(data: $0, response: $1, error: $2) }
         
@@ -128,7 +128,7 @@ final class URLSessionHTTPClientTests: XCTestCase {
         return URLResponse(url: anyURL(), mimeType: nil, expectedContentLength: 0, textEncodingName: nil)
     }
     
-    private func assertNotNil(_ value: Any?, _ message: @autoclosure () -> String = "", file: StaticString = #file, line: UInt = #line) {
+    private func assertNotNil(_ value: Any?, _ message: @autoclosure () -> String = "", file: StaticString = #filePath, line: UInt = #line) {
         XCTAssertNotNil(value, message(), file: file, line: line)
     }
 }

@@ -528,7 +528,7 @@ class FeedUIIntegrationTests: XCTestCase {
     
     private func makeSUT(
         selection: @MainActor @escaping (FeedImage) -> Void = { _ in },
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) -> (ListViewController, LoaderSpy) {
         let loader = LoaderSpy()
@@ -545,7 +545,7 @@ class FeedUIIntegrationTests: XCTestCase {
         return (sut, loader)
     }
     
-    func localized(_ key: String, table: String = "Feed", file: StaticString = #file, line: UInt = #line) -> String {
+    func localized(_ key: String, table: String = "Feed", file: StaticString = #filePath, line: UInt = #line) -> String {
         let bundle = Bundle(for: FeedPresenter.self)
         let value = bundle.localizedString(forKey: key, value: nil, table: table)
         if value == key {

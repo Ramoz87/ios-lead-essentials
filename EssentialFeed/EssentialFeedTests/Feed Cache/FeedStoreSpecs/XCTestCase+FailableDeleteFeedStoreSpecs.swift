@@ -9,13 +9,13 @@ import XCTest
 import EssentialFeed
 
 extension FailableDeleteFeedStoreSpecs where Self: XCTestCase {
-    func assertThatDeleteDeliversErrorOnDeletionError(on sut: FeedStore, file: StaticString = #file, line: UInt = #line) {
+    func assertThatDeleteDeliversErrorOnDeletionError(on sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) {
         let deletionError = delete(from: sut)
         
         XCTAssertNotNil(deletionError, "Expected cache deletion to fail", file: file, line: line)
     }
     
-    func assertThatDeleteHasNoSideEffectsOnDeletionError(on sut: FeedStore, file: StaticString = #file, line: UInt = #line) {
+    func assertThatDeleteHasNoSideEffectsOnDeletionError(on sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) {
         delete(from: sut)
         
         expect(sut, retrieve: .success(nil), file: file, line: line)

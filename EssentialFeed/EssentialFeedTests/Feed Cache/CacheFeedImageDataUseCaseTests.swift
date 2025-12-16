@@ -44,7 +44,7 @@ class CacheFeedImageDataUseCaseTests: XCTestCase {
     
     //MARK: - Private
     
-    private func makeSUT(currentDate: @escaping () -> Date = Date.init, file: StaticString = #file, line: UInt = #line) -> (sut: LocalFeedImageDataLoader, store: FeedImageDataStoreSpy) {
+    private func makeSUT(currentDate: @escaping () -> Date = Date.init, file: StaticString = #filePath, line: UInt = #line) -> (sut: LocalFeedImageDataLoader, store: FeedImageDataStoreSpy) {
         let store = FeedImageDataStoreSpy()
         let sut = LocalFeedImageDataLoader(store: store)
         trackMemoryLeaks(store, file: file, line: line)
@@ -56,7 +56,7 @@ class CacheFeedImageDataUseCaseTests: XCTestCase {
         return .failure(LocalFeedImageDataLoader.SaveError.failed)
     }
 
-    private func expect(_ sut: LocalFeedImageDataLoader, completeWith expectedResult: Result<Void, Error>, when action: () -> Void, file: StaticString = #file, line: UInt = #line) {
+    private func expect(_ sut: LocalFeedImageDataLoader, completeWith expectedResult: Result<Void, Error>, when action: () -> Void, file: StaticString = #filePath, line: UInt = #line) {
         
         action()
         let receivedResult = Result { try sut.save(anyData(), for: anyURL()) }
